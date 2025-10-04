@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: elasticsearch-ca
+  namespace: elasticsearch
+spec:
+  isCA: true
+  secretName: elasticsearch-ca
+  commonName: elasticsearch-ca
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer

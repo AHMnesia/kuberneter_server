@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suma-android-api-pvc
+  namespace: suma-android
+  labels:
+    app: suma-android
+    component: api
+  annotations:
+    description: "Persistent storage for application data/uploads. Adjust storageClassName as needed."
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suma-android-uploads-pvc
+  namespace: suma-android
+  labels:
+    app: suma-android
+    component: uploads
+  annotations:
+    description: "Storage for uploaded assets and static files."
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Mi

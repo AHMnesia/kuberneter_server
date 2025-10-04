@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  suma-ecommerce-api:
+    build: ./suma-ecommerce
+    ports:
+      - "8888:8000"
+    volumes:
+      - ./suma-ecommerce:/var/www/html
+    restart: unless-stopped
+  suma-office-api:
+    build:
+      context: ./suma-office
+      dockerfile: dockerfile.api
+    ports:
+      - "8889:8000"
+    volumes:
+      - ./suma-office:/var/www/html
+    restart: unless-stopped
+  suma-chat:
+    build:
+      context: ./suma-chat
+      dockerfile: dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      - redis
+    restart: unless-stopped
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+  ngrok:
+    image: ngrok/ngrok:latest
+    command: http --log=stdout --authtoken=2o8k6ntZebniF9fI9Osl1XQG7Ih_6ZjNh7W8QF4E34bJGH7aA suma-chat:4000 
+    depends_on:
+      - suma-chat
+    ports:
+      - "4040:4040"
+    restart: unless-stopped
+
+volumes:
+  redis-data:

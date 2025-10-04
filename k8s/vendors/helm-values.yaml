@@ -1,0 +1,18 @@
+# Helm values to enable metrics and keep Prometheus scrape annotations
+# Place next to your existing vendor manifest and use with `helm upgrade --install`
+controller:
+  metrics:
+    enabled: true
+    # serviceMonitor settings left commented; enable if you use Prometheus Operator
+    # serviceMonitor:
+    #   enabled: true
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "10254"
+      prometheus.io/path: "/metrics"
+
+# Optional: adjust replica count, service type, or other settings to match your current manifest
+# replicaCount: 2
+# service:
+#   type: LoadBalancer

@@ -1,0 +1,17 @@
+# Certificate untuk api.public.suma-honda.local (fallback cert-manager ketika tidak ada SSL manual)
+# Digunakan untuk semua ingress yang menggunakan domain api.public.suma-honda.local
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-suma-honda-id-cert
+  namespace: cert-manager  # Namespace cert-manager pasti sudah ada
+spec:
+  secretName: api-suma-honda-id-tls
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - api.suma-honda.id
+  privateKey:
+    rotationPolicy: Always

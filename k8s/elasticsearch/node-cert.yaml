@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: elasticsearch-node-cert
+  namespace: elasticsearch
+spec:
+  commonName: elasticsearch
+  dnsNames:
+  - elasticsearch
+  - elasticsearch.elasticsearch.svc.cluster.local
+  - elasticsearch-0.elasticsearch.elasticsearch.svc.cluster.local
+  - elasticsearch-1.elasticsearch.elasticsearch.svc.cluster.local
+  - elasticsearch-2.elasticsearch.elasticsearch.svc.cluster.local
+  issuerRef:
+    kind: ClusterIssuer
+    name: elasticsearch-ca-issuer
+  secretName: elasticsearch-ssl
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+  - client auth
+  duration: 2160h # 90d
+

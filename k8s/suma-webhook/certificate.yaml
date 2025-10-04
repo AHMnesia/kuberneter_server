@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: suma-webhook-local-tls
+  namespace: suma-webhook
+spec:
+  secretName: suma-webhook-tls
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - webhook.suma-honda.local

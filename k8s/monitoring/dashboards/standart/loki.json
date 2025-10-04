@@ -1,0 +1,85 @@
+{
+  "uid": "loki-metrics",
+  "title": "Loki Metrics",
+  "tags": ["loki", "logs", "monitoring"],
+  "panels": [
+    {
+      "datasource": "Loki",
+      "title": "Ingester Memory Usage (Bytes)",
+      "type": "graph",
+      "targets": [{"expr": "loki_ingester_memory_usage_bytes", "legendFormat": "Memory Usage"}],
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Ingester Received Bytes Total",
+      "type": "graph",
+      "targets": [{"expr": "loki_ingester_received_bytes_total", "legendFormat": "Received Bytes"}],
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Ingester Received Entries Total",
+      "type": "graph",
+      "targets": [{"expr": "loki_ingester_received_entries_total", "legendFormat": "Received Entries"}],
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Request Duration (Seconds)",
+      "type": "graph",
+      "targets": [{"expr": "loki_request_duration_seconds", "legendFormat": "Duration"}],
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Request Duration Count",
+      "type": "graph",
+      "targets": [{"expr": "loki_request_duration_seconds_count", "legendFormat": "Count"}],
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Request Duration Sum",
+      "type": "graph",
+      "targets": [{"expr": "loki_request_duration_seconds_sum", "legendFormat": "Sum"}],
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Server Started",
+      "type": "stat",
+      "targets": [{"expr": "loki_server_started", "legendFormat": "Started"}],
+      "gridPos": {"x": 0, "y": 18, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Server Stopped",
+      "type": "stat",
+      "targets": [{"expr": "loki_server_stopped", "legendFormat": "Stopped"}],
+      "gridPos": {"x": 12, "y": 18, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Storage Chunk Entries",
+      "type": "graph",
+      "targets": [{"expr": "loki_storage_chunk_entries", "legendFormat": "Chunk Entries"}],
+      "gridPos": {"x": 0, "y": 24, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Storage Chunk Size (Bytes)",
+      "type": "graph",
+      "targets": [{"expr": "loki_storage_chunk_size_bytes", "legendFormat": "Chunk Size"}],
+      "gridPos": {"x": 12, "y": 24, "w": 12, "h": 6}
+    },
+    {
+      "datasource": "Loki",
+      "title": "Storage Chunks Total",
+      "type": "graph",
+      "targets": [{"expr": "loki_storage_chunks_total", "legendFormat": "Chunks Total"}],
+      "gridPos": {"x": 0, "y": 30, "w": 24, "h": 6}
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" }
+}

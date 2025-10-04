@@ -1,0 +1,200 @@
+{"index":{"_index":"produk","_id":"1"}}
+{"id":1,"name":"Laptop Gaming ASUS ROG Strix G15","category":"Electronics","price":18500000.0,"stock":8,"created_at":"2025-01-15T10:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"2"}}
+{"id":2,"name":"Smartphone Samsung Galaxy S24 Ultra","category":"Electronics","price":19900000.0,"stock":12,"created_at":"2025-01-16T14:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"3"}}
+{"id":3,"name":"Kemeja Formal Pria Slim Fit","category":"Clothing","price":350000.0,"stock":25,"created_at":"2025-01-17T09:15:00.000+07:00"}
+{"index":{"_index":"produk","_id":"4"}}
+{"id":4,"name":"Novel 'Laskar Pelangi' Andrea Hirata","category":"Books","price":95000.0,"stock":45,"created_at":"2025-01-18T16:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"5"}}
+{"id":5,"name":"Blender Philips Avance Collection","category":"Home","price":1250000.0,"stock":18,"created_at":"2025-01-19T11:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"6"}}
+{"id":6,"name":"Sepatu Running Nike Air Zoom Pegasus","category":"Sports","price":1450000.0,"stock":15,"created_at":"2025-01-20T08:00:00.000+07:00"}
+{"index":{"_index":"produk","_id":"7"}}
+{"id":7,"name":"Headphone Sony WH-1000XM5","category":"Electronics","price":5200000.0,"stock":20,"created_at":"2025-01-21T13:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"8"}}
+{"id":8,"name":"Tas Wanita Gucci Marmont","category":"Clothing","price":8500000.0,"stock":5,"created_at":"2025-01-22T15:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"9"}}
+{"id":9,"name":"Komik One Piece Volume 100","category":"Books","price":105000.0,"stock":30,"created_at":"2025-01-23T10:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"10"}}
+{"id":10,"name":"Rice Cooker Sharp 1.8L","category":"Home","price":750000.0,"stock":22,"created_at":"2025-01-24T12:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"11"}}
+{"id":11,"name":"Monitor Gaming LG 27UL950-W","category":"Electronics","price":8750000.0,"stock":6,"created_at":"2025-01-25T09:15:00.000+07:00"}
+{"index":{"_index":"produk","_id":"12"}}
+{"id":12,"name":"iPhone 15 Pro Max 256GB","category":"Electronics","price":22500000.0,"stock":10,"created_at":"2025-01-26T14:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"13"}}
+{"id":13,"name":"Dress Wanita Casual Zara","category":"Clothing","price":450000.0,"stock":20,"created_at":"2025-01-27T11:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"14"}}
+{"id":14,"name":"Buku 'Atomic Habits' James Clear","category":"Books","price":125000.0,"stock":35,"created_at":"2025-01-28T16:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"15"}}
+{"id":15,"name":"Kulkas LG Inverter 2 Pintu","category":"Home","price":4850000.0,"stock":8,"created_at":"2025-01-29T08:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"16"}}
+{"id":16,"name":"Bola Basket Spalding NBA","category":"Sports","price":650000.0,"stock":12,"created_at":"2025-01-30T13:15:00.000+07:00"}
+{"index":{"_index":"produk","_id":"17"}}
+{"id":17,"name":"Keyboard Mechanical Logitech MX Keys","category":"Electronics","price":1850000.0,"stock":15,"created_at":"2025-01-31T10:00:00.000+07:00"}
+{"index":{"_index":"produk","_id":"18"}}
+{"id":18,"name":"Celana Jeans Levi's 501","category":"Clothing","price":850000.0,"stock":18,"created_at":"2025-02-01T15:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"19"}}
+{"id":19,"name":"Majalah National Geographic","category":"Books","price":75000.0,"stock":40,"created_at":"2025-02-02T12:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"20"}}
+{"id":20,"name":"Mesin Cuci Samsung Front Load","category":"Home","price":6250000.0,"stock":7,"created_at":"2025-02-03T09:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"21"}}
+{"id":21,"name":"Raket Badminton Yonex Astrox","category":"Sports","price":1250000.0,"stock":14,"created_at":"2025-02-04T14:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"22"}}
+{"id":22,"name":"Mouse Gaming Razer DeathAdder","category":"Electronics","price":750000.0,"stock":25,"created_at":"2025-02-05T11:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"23"}}
+{"id":23,"name":"Jaket Bomber Pria","category":"Clothing","price":650000.0,"stock":16,"created_at":"2025-02-06T16:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"24"}}
+{"id":24,"name":"Ensiklopedia Dunia Pengetahuan","category":"Books","price":285000.0,"stock":8,"created_at":"2025-02-07T08:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"25"}}
+{"id":25,"name":"Setrika Philips PerfectCare","category":"Home","price":1850000.0,"stock":11,"created_at":"2025-02-08T13:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"26"}}
+{"id":26,"name":"Sepeda MTB Polygon","category":"Sports","price":4850000.0,"stock":6,"created_at":"2025-02-09T10:15:00.000+07:00"}
+{"index":{"_index":"produk","_id":"27"}}
+{"id":27,"name":"Webcam Logitech C920","category":"Electronics","price":650000.0,"stock":20,"created_at":"2025-02-10T15:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"28"}}
+{"id":28,"name":"Kaos Polos Uniqlo","category":"Clothing","price":150000.0,"stock":50,"created_at":"2025-02-11T12:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"29"}}
+{"id":29,"name":"Buku Masak Resep Nusantara","category":"Books","price":95000.0,"stock":28,"created_at":"2025-02-12T09:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"30"}}
+{"id":30,"name":"Vacuum Cleaner Dyson","category":"Home","price":7850000.0,"stock":5,"created_at":"2025-02-13T14:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"31"}}
+{"id":31,"name":"Matras Yoga","category":"Sports","price":250000.0,"stock":30,"created_at":"2025-02-14T11:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"32"}}
+{"id":32,"name":"Router TP-Link Archer AX73","category":"Electronics","price":1250000.0,"stock":15,"created_at":"2025-02-15T16:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"33"}}
+{"id":33,"name":"Rok Wanita Midi","category":"Clothing","price":285000.0,"stock":22,"created_at":"2025-02-16T08:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"34"}}
+{"id":34,"name":"Atlas Dunia National Geographic","category":"Books","price":425000.0,"stock":12,"created_at":"2025-02-17T13:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"35"}}
+{"id":35,"name":"Microwave Oven Samsung","category":"Home","price":1450000.0,"stock":9,"created_at":"2025-02-18T10:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"36"}}
+{"id":36,"name":"Dumbbell Set 20kg","category":"Sports","price":850000.0,"stock":8,"created_at":"2025-02-19T15:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"37"}}
+{"id":37,"name":"SSD Samsung 970 EVO 1TB","category":"Electronics","price":1850000.0,"stock":18,"created_at":"2025-02-20T12:00:00.000+07:00"}
+{"index":{"_index":"produk","_id":"38"}}
+{"id":38,"name":"Sweater Rajut Wanita","category":"Clothing","price":325000.0,"stock":24,"created_at":"2025-02-21T09:15:00.000+07:00"}
+{"index":{"_index":"produk","_id":"39"}}
+{"id":39,"name":"Kamus Bahasa Inggris","category":"Books","price":125000.0,"stock":32,"created_at":"2025-02-22T14:30:00.000+07:00"}
+{"index":{"_index":"produk","_id":"40"}}
+{"id":40,"name":"Air Purifier Xiaomi","category":"Home","price":950000.0,"stock":13,"created_at":"2025-02-23T11:45:00.000+07:00"}
+{"index":{"_index":"produk","_id":"41"}}
+{"id":41,"name":"Treadmill Electric","category":"Sports","price":8750000.0,"stock":4,"created_at":"2025-02-24T16:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"42"}}
+{"id":42,"name":"Power Bank Anker 20000mAh","category":"Electronics","price":450000.0,"stock":35,"created_at":"2025-02-25T08:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"43"}}
+{"id":43,"name":"Blouse Wanita Katun","category":"Clothing","price":185000.0,"stock":28,"created_at":"2025-02-26T13:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"44"}}
+{"id":44,"name":"Novel 'Pulang' Tere Liye","category":"Books","price":85000.0,"stock":38,"created_at":"2025-02-27T10:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"45"}}
+{"id":45,"name":"Coffee Maker Philips","category":"Home","price":1250000.0,"stock":10,"created_at":"2025-02-28T15:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"46"}}
+{"id":46,"name":"Yoga Ball","category":"Sports","price":150000.0,"stock":25,"created_at":"2025-03-01T12:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"47"}}
+{"id":47,"name":"Smart TV Samsung 55 Inch","category":"Electronics","price":9850000.0,"stock":7,"created_at":"2025-03-02T09:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"48"}}
+{"id":48,"name":"Celana Kulot Wanita","category":"Clothing","price":225000.0,"stock":30,"created_at":"2025-03-03T14:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"49"}}
+{"id":49,"name":"Buku Motivasi 'Think and Grow Rich'","category":"Books","price":145000.0,"stock":20,"created_at":"2025-03-04T11:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"50"}}
+{"id":50,"name":"Water Heater Ariston","category":"Home","price":1850000.0,"stock":12,"created_at":"2025-03-05T16:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"51"}}
+{"id":51,"name":"Resistance Band Set","category":"Sports","price":125000.0,"stock":40,"created_at":"2025-03-06T08:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"52"}}
+{"id":52,"name":"Graphics Card RTX 4070","category":"Electronics","price":12500000.0,"stock":3,"created_at":"2025-03-07T13:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"53"}}
+{"id":53,"name":"Cardigan Wanita","category":"Clothing","price":285000.0,"stock":26,"created_at":"2025-03-08T10:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"54"}}
+{"id":54,"name":"Komik Naruto Complete Box Set","category":"Books","price":2500000.0,"stock":5,"created_at":"2025-03-09T15:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"55"}}
+{"id":55,"name":"Dishwasher Bosch","category":"Home","price":8750000.0,"stock":4,"created_at":"2025-03-10T12:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"56"}}
+{"id":56,"name":"Boxing Gloves","category":"Sports","price":350000.0,"stock":18,"created_at":"2025-03-11T09:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"57"}}
+{"id":57,"name":"Wireless Earbuds Samsung","category":"Electronics","price":850000.0,"stock":22,"created_at":"2025-03-12T14:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"58"}}
+{"id":58,"name":"Topi Baseball","category":"Clothing","price":125000.0,"stock":35,"created_at":"2025-03-13T11:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"59"}}
+{"id":59,"name":"Buku 'Sapiens' Yuval Noah Harari","category":"Books","price":165000.0,"stock":15,"created_at":"2025-03-14T16:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"60"}}
+{"id":60,"name":"Air Fryer Philips","category":"Home","price":1450000.0,"stock":11,"created_at":"2025-03-15T08:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"61"}}
+{"id":61,"name":"Swimming Goggles","category":"Sports","price":85000.0,"stock":45,"created_at":"2025-03-16T13:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"62"}}
+{"id":62,"name":"Drone DJI Mini 3","category":"Electronics","price":8750000.0,"stock":6,"created_at":"2025-03-17T10:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"63"}}
+{"id":63,"name":"Legging Sport","category":"Clothing","price":195000.0,"stock":32,"created_at":"2025-03-18T15:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"64"}}
+{"id":64,"name":"Majalah Tempo","category":"Books","price":35000.0,"stock":60,"created_at":"2025-03-19T12:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"65"}}
+{"id":65,"name":"Standing Fan Panasonic","category":"Home","price":650000.0,"stock":16,"created_at":"2025-03-20T09:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"66"}}
+{"id":66,"name":"Basketball Hoop","category":"Sports","price":1250000.0,"stock":9,"created_at":"2025-03-21T14:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"67"}}
+{"id":67,"name":"Projector Epson","category":"Electronics","price":4850000.0,"stock":8,"created_at":"2025-03-22T11:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"68"}}
+{"id":68,"name":"Bikini Wanita","category":"Clothing","price":225000.0,"stock":20,"created_at":"2025-03-23T16:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"69"}}
+{"id":69,"name":"Buku Anak 'Si Kancil'","category":"Books","price":45000.0,"stock":50,"created_at":"2025-03-24T08:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"70"}}
+{"id":70,"name":"Washing Machine LG","category":"Home","price":5250000.0,"stock":7,"created_at":"2025-03-25T13:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"71"}}
+{"id":71,"name":"Tennis Racket Wilson","category":"Sports","price":1850000.0,"stock":10,"created_at":"2025-03-26T10:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"72"}}
+{"id":72,"name":"Smartwatch Garmin","category":"Electronics","price":4250000.0,"stock":12,"created_at":"2025-03-27T15:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"73"}}
+{"id":73,"name":"Sarung Tangan Musim Dingin","category":"Clothing","price":95000.0,"stock":40,"created_at":"2025-03-28T12:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"74"}}
+{"id":74,"name":"Novel 'Ayat-Ayat Cinta' Habiburrahman","category":"Books","price":75000.0,"stock":42,"created_at":"2025-03-29T09:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"75"}}
+{"id":75,"name":"Refrigerator Side by Side","category":"Home","price":18500000.0,"stock":3,"created_at":"2025-03-30T14:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"76"}}
+{"id":76,"name":"Golf Club Set","category":"Sports","price":12500000.0,"stock":2,"created_at":"2025-03-31T11:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"77"}}
+{"id":77,"name":"VR Headset Oculus Quest 2","category":"Electronics","price":4850000.0,"stock":9,"created_at":"2025-04-01T16:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"78"}}
+{"id":78,"name":"Jas Hujan","category":"Clothing","price":165000.0,"stock":28,"created_at":"2025-04-02T08:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"79"}}
+{"id":79,"name":"Buku 'Rich Dad Poor Dad'","category":"Books","price":95000.0,"stock":35,"created_at":"2025-04-03T13:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"80"}}
+{"id":80,"name":"Toaster Oven","category":"Home","price":650000.0,"stock":14,"created_at":"2025-04-04T10:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"81"}}
+{"id":81,"name":"Surfboard","category":"Sports","price":2850000.0,"stock":5,"created_at":"2025-04-05T15:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"82"}}
+{"id":82,"name":"Bluetooth Speaker JBL","category":"Electronics","price":750000.0,"stock":25,"created_at":"2025-04-06T12:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"83"}}
+{"id":83,"name":"Kaos Kaki Sport","category":"Clothing","price":45000.0,"stock":55,"created_at":"2025-04-07T09:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"84"}}
+{"id":84,"name":"Ensiklopedia Sains","category":"Books","price":325000.0,"stock":18,"created_at":"2025-04-08T14:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"85"}}
+{"id":85,"name":"Electric Kettle","category":"Home","price":285000.0,"stock":20,"created_at":"2025-04-09T11:35:00.000+07:00"}
+{"index":{"_index":"produk","_id":"86"}}
+{"id":86,"name":"Skateboard Complete","category":"Sports","price":650000.0,"stock":12,"created_at":"2025-04-10T16:50:00.000+07:00"}
+{"index":{"_index":"produk","_id":"87"}}
+{"id":87,"name":"Tablet Samsung Galaxy Tab","category":"Electronics","price":4250000.0,"stock":11,"created_at":"2025-04-11T08:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"88"}}
+{"id":88,"name":"Topi Wanita","category":"Clothing","price":85000.0,"stock":38,"created_at":"2025-04-12T13:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"89"}}
+{"id":89,"name":"Komik Detective Conan","category":"Books","price":25000.0,"stock":65,"created_at":"2025-04-13T10:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"90"}}
+{"id":90,"name":"Hair Dryer Dyson","category":"Home","price":3250000.0,"stock":8,"created_at":"2025-04-14T15:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"91"}}
+{"id":91,"name":"Badminton Shuttlecock","category":"Sports","price":150000.0,"stock":30,"created_at":"2025-04-15T12:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"92"}}
+{"id":92,"name":"External Hard Drive 2TB","category":"Electronics","price":850000.0,"stock":19,"created_at":"2025-04-16T09:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"93"}}
+{"id":93,"name":"Celana Pendek","category":"Clothing","price":125000.0,"stock":45,"created_at":"2025-04-17T14:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"94"}}
+{"id":94,"name":"Buku 'The Alchemist' Paulo Coelho","category":"Books","price":85000.0,"stock":40,"created_at":"2025-04-18T11:10:00.000+07:00"}
+{"index":{"_index":"produk","_id":"95"}}
+{"id":95,"name":"Blender Oster","category":"Home","price":950000.0,"stock":13,"created_at":"2025-04-19T16:25:00.000+07:00"}
+{"index":{"_index":"produk","_id":"96"}}
+{"id":96,"name":"Football Nike","category":"Sports","price":425000.0,"stock":22,"created_at":"2025-04-20T08:40:00.000+07:00"}
+{"index":{"_index":"produk","_id":"97"}}
+{"id":97,"name":"Gaming Console PlayStation 5","category":"Electronics","price":8750000.0,"stock":4,"created_at":"2025-04-21T13:55:00.000+07:00"}
+{"index":{"_index":"produk","_id":"98"}}
+{"id":98,"name":"Swimsuit Pria","category":"Clothing","price":195000.0,"stock":24,"created_at":"2025-04-22T10:05:00.000+07:00"}
+{"index":{"_index":"produk","_id":"99"}}
+{"id":99,"name":"Majalah Bobo","category":"Books","price":25000.0,"stock":55,"created_at":"2025-04-23T15:20:00.000+07:00"}
+{"index":{"_index":"produk","_id":"100"}}
+{"id":100,"name":"Slow Cooker Crock-Pot","category":"Home","price":750000.0,"stock":15,"created_at":"2025-04-24T12:35:00.000+07:00"}

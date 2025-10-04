@@ -1,0 +1,59 @@
+﻿apiVersion: v1
+kind: List
+items:
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: suma-office-general-local
+      namespace: suma-office-general
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    spec:
+      ingressClassName: nginx
+      tls:
+        - hosts:
+            - suma-office-general.local
+          secretName: suma-office-general-tls
+      rules:
+        - host: suma-office-general.local
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: suma-office-general-api-service
+                    port:
+                      number: 8000
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: suma-office-general-api
+      namespace: suma-office-general
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+        nginx.ingress.kubernetes.io/proxy-buffering: "off"
+        # cert-manager.io/cluster-issuer: "selfsigned-cluster-issuer" # DISABLED: SSL manual untuk api.public.suma-honda.local
+    spec:
+      ingressClassName: nginx
+      tls:
+        - hosts:
+            - api.suma-honda.id
+          secretName: api-suma-honda-id-tls
+      rules:
+        - host: api.suma-honda.id
+          http:
+            paths:
+              - path: /suma-office-general(/|$)(.*)
+                pathType: ImplementationSpecific
+                backend:
+                  service:
+                    name: suma-office-general-api-service
+                    port:
+                      number: 8000

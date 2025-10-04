@@ -1,0 +1,71 @@
+# Pod Disruption Budgets untuk Application Services
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-ecommerce-pdb
+  namespace: suma-ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-ecommerce-api
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-office-pdb
+  namespace: suma-office
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-office-api
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-android-pdb
+  namespace: suma-android
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-android-api
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-pmo-pdb
+  namespace: suma-pmo
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-pmo-api
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: elasticsearch-pdb
+  namespace: elasticsearch
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kibana-pdb
+  namespace: kibana
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: kibana

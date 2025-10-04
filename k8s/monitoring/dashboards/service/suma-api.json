@@ -1,0 +1,129 @@
+{
+  "uid": "suma-api-detailed",
+  "title": "🏢 Suma API Monitoring",
+  "tags": ["suma", "api", "laravel"],
+  "templating": {
+    "list": [
+      {
+        "type": "custom",
+        "name": "service_type",
+        "label": "Service Type",
+        "hide": 0,
+        "current": { "text": "Office", "value": "suma-office" },
+        "options": [
+          { "text": "Office", "value": "suma-office", "selected": true },
+          { "text": "Office General", "value": "suma-office-general", "selected": false },
+          { "text": "Ecommerce", "value": "suma-ecommerce", "selected": false },
+          { "text": "Android", "value": "suma-android", "selected": false },
+          { "text": "PMO", "value": "suma-pmo", "selected": false }
+        ],
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "title": "🔄 API Health Status",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "probe_success{job=\"${service_type}-api-health\"}",
+          "instant": true,
+          "legendFormat": "Health Check"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": { "text": "🔴 API DOWN", "color": "red" },
+                "1": { "text": "🟢 API UP", "color": "green" }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center"
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "👥 Active Pods",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "count(container_start_time_seconds{namespace=\"${service_type}\", pod!=\"\"}) by (namespace)",
+          "instant": true,
+          "legendFormat": "Ready Pods"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "⚡ Response Time",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "probe_duration_seconds{job=\"${service_type}-api-health\"} * 1000",
+          "instant": true,
+          "legendFormat": "Response Time (ms)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "min": 0,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 1000 }
+            ]
+          },
+          "noValue": "UNKNOWN"
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "💾 Memory Usage",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "container_memory_usage_bytes{pod=~\"${service_type}-api.*\"} / 1024 / 1024",
+          "legendFormat": "{{pod}} (MB)"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "🖥️ CPU Usage",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{pod=~\"${service_type}-api.*\"}[5m]) * 100",
+          "legendFormat": "{{pod}} (%)"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 }
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" }
+}

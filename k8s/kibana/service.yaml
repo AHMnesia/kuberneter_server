@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  labels:
+    app: kibana
+  namespace: kibana
+spec:
+  ports:
+    - port: 5601
+      name: http
+  selector:
+    app: kibana
+  type: ClusterIP

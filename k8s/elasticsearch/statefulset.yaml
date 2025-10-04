@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: elasticsearch
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:9.1.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "800m"
+        env:
+        - name: cluster.name
+          value: "suma-cluster"
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: network.publish_host
+          value: "${node.name}.elasticsearch.elasticsearch.svc.cluster.local"
+        - name: network.host
+          value: "0.0.0.0"
+        - name: discovery.seed_hosts
+          value: "elasticsearch-0.elasticsearch.elasticsearch.svc.cluster.local,elasticsearch-1.elasticsearch.elasticsearch.svc.cluster.local,elasticsearch-2.elasticsearch.elasticsearch.svc.cluster.local"
+        - name: cluster.initial_master_nodes
+          value: "elasticsearch-0,elasticsearch-1,elasticsearch-2"
+        - name: ES_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        - name: ELASTIC_PASSWORD
+          value: "admin123"
+        - name: xpack.security.enabled
+          value: "true"
+        - name: xpack.security.transport.ssl.enabled
+          value: "true"
+        - name: xpack.security.transport.ssl.certificate
+          value: "/usr/share/elasticsearch/config/certs/certificate.crt"
+        - name: xpack.security.transport.ssl.key
+          value: "/usr/share/elasticsearch/config/certs/certificate.key"
+        args:
+        - elasticsearch
+        - -E
+        - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+        - -E
+        - xpack.security.transport.ssl.enabled=true
+        - -E
+        - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certs/certificate.crt
+        - -E
+        - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certs/certificate.key
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        # Probes: use TCP checks on the HTTP port and a longer startup probe so
+        # the container is only considered ready when Elasticsearch is listening
+        # on 9200 and the startup probe allowed more time for initialization.
+        readinessProbe:
+          tcpSocket:
+            port: 9200
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 6
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 9200
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          failureThreshold: 3
+          timeoutSeconds: 5
+        startupProbe:
+          tcpSocket:
+            port: 9200
+          periodSeconds: 10
+          failureThreshold: 60
+          timeoutSeconds: 5
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 30"]
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+        - name: elasticsearch-ssl
+          mountPath: /usr/share/elasticsearch/config/certs
+          readOnly: true
+      volumes:
+      - name: elasticsearch-ssl
+        secret:
+          secretName: elasticsearch-ssl
+          items:
+          - key: tls.crt
+            path: certificate.crt
+          - key: tls.key
+            path: certificate.key
+          - key: ca.crt
+            path: ca.crt
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi

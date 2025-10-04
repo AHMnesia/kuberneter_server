@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-office-general-pdb
+  namespace: suma-office-general
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-office-general

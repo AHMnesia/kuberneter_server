@@ -1,0 +1,605 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager:9093
+
+    scrape_configs:
+    # ====================================HEALTH CHECKS START==============================================================
+
+      # Suma Ecommerce API (HTTP probe via blackbox with timeout)
+      - job_name: 'suma-ecommerce-api-health'
+        static_configs:
+          - targets: ['suma-ecommerce-api-service.suma-ecommerce.svc.cluster.local:8000/']
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma Office API (HTTP probe via blackbox with timeout)
+      - job_name: 'suma-office-api-health'
+        static_configs:
+          - targets: ['suma-office-api-service.suma-office.svc.cluster.local:8000/']
+        metrics_path: /probe
+        params:
+          module: [http_2xx_follow_redirects]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma Office General API (HTTP probe via blackbox with timeout)
+      - job_name: 'suma-office-general-api-health'
+        static_configs:
+          - targets: ['suma-office-general-api-service.suma-office-general.svc.cluster.local:8000/']
+        metrics_path: /probe
+        params:
+          module: [http_2xx_follow_redirects]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma pmo API (HTTP probe via blackbox with timeout)
+      - job_name: 'suma-pmo-api-health'
+        static_configs:
+          - targets: ['suma-pmo-api-service.suma-pmo.svc.cluster.local:8000/health']
+        metrics_path: /probe
+        params:
+          module: [http_2xx_follow_redirects]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma Android API (HTTP probe via blackbox with timeout)
+      - job_name: 'suma-android-api-health'
+        static_configs:
+          - targets: ['suma-android-api-service.suma-android.svc.cluster.local:8000/health']
+        metrics_path: /probe
+        params:
+          module: [http_2xx_follow_redirects]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+    
+      # Elasticsearch HTTP health check via blackbox exporter
+      - job_name: 'elasticsearch-health'
+        static_configs:
+          - targets: ['http://elasticsearch.elasticsearch.svc.cluster.local:9200/_cluster/health']
+        metrics_path: /probe
+        params:
+          module: [http_2xx_follow_elasticsearch]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma Webhook health check via blackbox exporter
+      - job_name: 'suma-webhook-health'
+        static_configs:
+          - targets: ['192.168.1.125:5000/health']
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Suma Chat health check via blackbox exporter
+      - job_name: 'suma-chat-health'
+        static_configs:
+          - targets: ['suma-chat.suma-chat.svc.cluster.local:80/health']
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Redis Cluster health check via blackbox exporter (TCP probe)
+      - job_name: 'redis-health'
+        static_configs:
+          - targets: ['redis-cluster.redis.svc.cluster.local:6379']
+        metrics_path: /probe
+        params:
+          module: [tcp_connect]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Kibana health check via blackbox exporter
+      - job_name: 'kibana-health'
+        static_configs:
+          - targets: ['http://kibana.kibana.svc.cluster.local:5601/api/status']
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+      # Ingress NGINX health check via blackbox exporter
+      - job_name: 'ingress-nginx-health'
+        static_configs:
+          - targets: ['http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80/healthz']
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        scrape_interval: 30s
+        scrape_timeout: 10s
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+    # =====================================HEALTH CHECKS END===============================================================
+    
+      # Prometheus itself
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Ingress metrics
+      - job_name: 'ingress-nginx'
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names: ['ingress-nginx']
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          action: keep
+          regex: ingress-nginx-controller-metrics
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: metrics
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_ip]
+          target_label: instance
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: kubernetes_service
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: kubernetes_pod
+        metrics_path: /metrics
+        scrape_interval: 15s
+
+      # Kubernetes cluster monitoring
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names: ['default']
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: default;kubernetes;https
+
+      # Kubernetes nodes (kubelet /metrics via apiserver proxy)
+      - job_name: 'kubernetes-nodes'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+        - role: node
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/$1/proxy/metrics
+
+      # Cadvisor/kubelet metrics for container monitoring (via apiserver proxy)
+      - job_name: 'kubernetes-cadvisor'
+        kubernetes_sd_configs:
+        - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+
+      # Node Exporter for host/node metrics
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
+        metrics_path: /metrics
+        scrape_interval: 15s
+
+      # Elasticsearch exporter metrics
+      - job_name: 'elasticsearch'
+        kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names: ['monitoring']
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex: elasticsearch-exporter
+        - source_labels: [__meta_kubernetes_pod_ip]
+          target_label: instance
+        - source_labels: [__address__]
+          target_label: __address__
+        metrics_path: /metrics
+        scrape_interval: 30s
+
+      # Redis Cluster metrics
+      - job_name: 'redis-cluster'
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names: ['monitoring']
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          action: keep
+          regex: redis-exporter
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: metrics
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_ip]
+          target_label: instance
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: kubernetes_service
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: kubernetes_pod
+        metrics_path: /metrics
+        scrape_interval: 30s
+
+      # Blackbox Exporter self-metrics (for availability status on dashboards)
+      - job_name: 'blackbox'
+        static_configs:
+          - targets: ['blackbox-exporter.monitoring.svc.cluster.local:9115']
+        metrics_path: /metrics
+        scrape_interval: 30s
+
+      # Loki metrics
+      - job_name: 'loki'
+        static_configs:
+          - targets: ['loki.monitoring.svc.cluster.local:3100']
+        metrics_path: /metrics
+        scrape_interval: 30s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 60
+        options:
+          path: /var/lib/grafana/dashboards
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: monitoring
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus:9090
+      isDefault: true
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki:3100
+  
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+    - name: 'all-dashboards'
+      orgId: 1
+      folder: 'Suma Monitoring'
+      type: file
+      disableDeletion: false
+      editable: true
+      updateIntervalSeconds: 10
+      options:
+        path: /var/lib/grafana/dashboards
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: monitoring
+data:
+  config.yml: |
+    auth_enabled: false
+    
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+    
+    common:
+      instance_addr: 127.0.0.1
+      path_prefix: /loki
+      storage:
+        filesystem:
+          chunks_directory: /loki/chunks
+          rules_directory: /loki/rules
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+    
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /loki/boltdb-shipper-active
+        cache_location: /loki/boltdb-shipper-cache
+        shared_store: filesystem
+      filesystem:
+        directory: /loki/chunks
+    
+    limits_config:
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      ingestion_rate_mb: 16
+      ingestion_burst_size_mb: 32
+    
+    chunk_store_config:
+      max_look_back_period: 0s
+    
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0s
+    
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: /loki/rules
+      rule_path: /loki/rules
+      alertmanager_url: http://alertmanager:9093
+      ring:
+        kvstore:
+          store: inmemory
+      enable_api: true
+    
+    analytics:
+      reporting_enabled: false
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: monitoring
+data:
+  config.yml: |
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+    positions:
+      filename: /tmp/positions.yaml
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    scrape_configs:
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+        action: keep
+        regex: true
+      - source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_path
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels:
+        - __address__
+        - __meta_kubernetes_pod_annotation_prometheus_io_port
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels:
+        - __meta_kubernetes_namespace
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels:
+        - __meta_kubernetes_pod_name
+        action: replace
+        target_label: kubernetes_pod_name
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  config.yml: |
+    global:
+      smtp_smarthost: 'localhost:587'
+      smtp_from: 'alertmanager@suma-honda.id'
+    route:
+      group_by: ['alertname']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      receiver: 'suma-team'
+    receivers:
+    - name: 'suma-team'
+      webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-config
+  namespace: monitoring
+data:
+  config.yml: |
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []
+          method: GET
+          follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          preferred_ip_protocol: "ip4"
+      http_2xx_follow_redirects:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []
+          method: GET
+          follow_redirects: true
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          preferred_ip_protocol: "ip4"
+      http_2xx_follow_elasticsearch:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: []
+          method: GET
+          follow_redirects: true
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          preferred_ip_protocol: "ip4"
+          basic_auth:
+            username: "kibana_user"
+            password: "kibanapass"
+      icmp:
+        prober: icmp
+        timeout: 5s
+        icmp:
+          preferred_ip_protocol: "ip4"
+      tcp_connect:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          preferred_ip_protocol: "ip4"

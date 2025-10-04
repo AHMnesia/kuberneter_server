@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:9.1.0
+        env:
+          - name: ELASTICSEARCH_HOSTS
+            value: "http://elasticsearch.elasticsearch.svc.cluster.local:9200"
+          - name: ELASTICSEARCH_USERNAME
+            value: "kibana_user"
+          - name: ELASTICSEARCH_PASSWORD
+            value: "kibanapass"
+          - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+            valueFrom:
+              secretKeyRef:
+                name: kibana-encryption-key
+                key: encryptionKey
+        ports:
+        - containerPort: 5601

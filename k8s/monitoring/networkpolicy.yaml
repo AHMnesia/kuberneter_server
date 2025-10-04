@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: monitoring
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: name
+                operator: In
+                values:
+                  - ingress-nginx
+                  - nginx-system
+      ports:
+        - protocol: TCP
+          port: 80

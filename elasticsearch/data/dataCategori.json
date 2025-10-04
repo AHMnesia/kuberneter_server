@@ -1,0 +1,30 @@
+{"index":{"_index":"kategori","_id":"1"}}
+{"id":1,"name":"Electronics","description":"Electronic devices and gadgets","parent_id":null,"is_active":true,"created_at":"2025-01-01T08:00:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"2"}}
+{"id":2,"name":"Clothing","description":"Fashion and apparel items","parent_id":null,"is_active":true,"created_at":"2025-01-01T08:15:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"3"}}
+{"id":3,"name":"Books","description":"Books and publications","parent_id":null,"is_active":true,"created_at":"2025-01-01T08:30:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"4"}}
+{"id":4,"name":"Home","description":"Home appliances and furniture","parent_id":null,"is_active":true,"created_at":"2025-01-01T08:45:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"5"}}
+{"id":5,"name":"Sports","description":"Sports equipment and accessories","parent_id":null,"is_active":true,"created_at":"2025-01-01T09:00:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"6"}}
+{"id":6,"name":"Laptops","description":"Laptop computers and accessories","parent_id":1,"is_active":true,"created_at":"2025-01-01T09:15:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"7"}}
+{"id":7,"name":"Smartphones","description":"Mobile phones and accessories","parent_id":1,"is_active":true,"created_at":"2025-01-01T09:30:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"8"}}
+{"id":8,"name":"Men's Clothing","description":"Clothing for men","parent_id":2,"is_active":true,"created_at":"2025-01-01T09:45:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"9"}}
+{"id":9,"name":"Women's Clothing","description":"Clothing for women","parent_id":2,"is_active":true,"created_at":"2025-01-01T10:00:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"10"}}
+{"id":10,"name":"Fiction","description":"Fiction books and novels","parent_id":3,"is_active":true,"created_at":"2025-01-01T10:15:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"11"}}
+{"id":11,"name":"Non-Fiction","description":"Non-fiction books and educational materials","parent_id":3,"is_active":true,"created_at":"2025-01-01T10:30:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"12"}}
+{"id":12,"name":"Kitchen Appliances","description":"Kitchen and cooking appliances","parent_id":4,"is_active":true,"created_at":"2025-01-01T10:45:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"13"}}
+{"id":13,"name":"Fitness Equipment","description":"Gym and fitness equipment","parent_id":5,"is_active":true,"created_at":"2025-01-01T11:00:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"14"}}
+{"id":14,"name":"Outdoor Sports","description":"Outdoor sports and recreation equipment","parent_id":5,"is_active":true,"created_at":"2025-01-01T11:15:00.000+07:00"}
+{"index":{"_index":"kategori","_id":"15"}}
+{"id":15,"name":"Gaming","description":"Gaming consoles and accessories","parent_id":1,"is_active":true,"created_at":"2025-01-01T11:30:00.000+07:00"}

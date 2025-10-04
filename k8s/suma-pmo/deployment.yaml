@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suma-pmo-api
+  namespace: suma-pmo
+  labels:
+    app: suma-pmo-api
+    environment: production
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: suma-pmo-api
+      environment: production
+  template:
+    metadata:
+      labels:
+        app: suma-pmo-api
+        environment: production
+    spec:
+      containers:
+      - name: suma-pmo-api
+        image: suma-pmo-api:latest
+        imagePullPolicy: Never
+        command: ['php', 'artisan', 'serve', '--host=0.0.0.0', '--port=8000']
+        workingDir: /var/www/html
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+            ephemeral-storage: "500Mi"
+          limits:
+            memory: "1Gi"
+            cpu: "800m"
+            ephemeral-storage: "2Gi"
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: APP_DEBUG
+          value: "false"
+        # Use tcpSocket probes to check the port is accepting connections.
+        startupProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 30
+          timeoutSeconds: 1
+        livenessProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3

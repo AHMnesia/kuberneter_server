@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suma-office-api
+  namespace: suma-office
+  labels:
+    app: suma-office-api
+    environment: production
+spec:
+  replicas: 2  # High availability untuk production
+  revisionHistoryLimit: 3  # Keep only 3 old ReplicaSets
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1    # Allow 1 pod to be unavailable (50%)
+      maxSurge: 0          # No extra pods during update
+  selector:
+    matchLabels:
+      app: suma-office-api
+      environment: production
+  template:
+    metadata:
+      labels:
+        app: suma-office-api
+        environment: production
+    spec:
+      containers:
+      - name: suma-office-api
+        image: suma-office-api:latest  # Production image dengan SQL Server driver
+        imagePullPolicy: Never  # Gunakan image lokal
+        ports:
+        - containerPort: 8000
+        workingDir: /var/www/html
+        # Do not override the image ENTRYPOINT here. The image provides supervisord
+        # to manage multiple processes (nginx/php-fpm or php artisan + queue workers).
+        # Overriding the command with `php artisan serve` made PID 1 the PHP server
+        # so supervisord was never started. Remove `command` so supervisord runs.
+        # Production mode - tidak ada volume mount
+        resources:
+          requests:
+            memory: "128Mi"  # Reduced from 256Mi
+            cpu: "100m"      # Reduced from 200m
+            ephemeral-storage: "250Mi"  # Reduced from 500Mi
+          limits:
+            memory: "512Mi"  # Reduced from 1Gi
+            cpu: "400m"      # Reduced from 800m
+            ephemeral-storage: "1Gi"    # Reduced from 2Gi
+        envFrom:
+        - configMapRef:
+            name: suma-office-config
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3

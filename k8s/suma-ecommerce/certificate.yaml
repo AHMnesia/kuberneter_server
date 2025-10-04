@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: suma-ecommerce-local-tls
+  namespace: suma-ecommerce
+spec:
+  secretName: suma-ecommerce-tls
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - suma-ecommerce.local

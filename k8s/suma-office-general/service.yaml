@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: suma-office-general-api-service
+  namespace: suma-office-general
+  labels:
+    app: suma-office-general-api
+    environment: production
+spec:
+  type: ClusterIP  # Internal service untuk production
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: suma-office-general-api
+    environment: production

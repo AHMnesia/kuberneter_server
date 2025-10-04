@@ -1,0 +1,67 @@
+﻿apiVersion: v1
+kind: List
+items:
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: elasticsearch-local
+      namespace: elasticsearch
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    spec:
+      ingressClassName: nginx
+      tls:
+        - hosts:
+            - search.suma-honda.local
+          secretName: elasticsearch-tls
+      rules:
+        - host: search.suma-honda.local
+          http:
+            paths:
+              - path: /suma-search
+                pathType: Prefix
+                backend:
+                  service:
+                    name: elasticsearch
+                    port:
+                      number: 9200
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: elasticsearch
+                    port:
+                      number: 9200
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: elasticsearch-api
+      namespace: elasticsearch
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+        # cert-manager.io/cluster-issuer: "selfsigned-cluster-issuer" # DISABLED: SSL manual untuk api.public.suma-honda.local
+    spec:
+      ingressClassName: nginx
+      tls:
+        - hosts:
+            - api.suma-honda.id
+          secretName: api-suma-honda-id-tls
+      rules:
+        - host: api.suma-honda.id
+          http:
+            paths:
+              - path: /suma-search(/|$)(.*)
+                pathType: ImplementationSpecific
+                backend:
+                  service:
+                    name: elasticsearch
+                    port:
+                      number: 9200

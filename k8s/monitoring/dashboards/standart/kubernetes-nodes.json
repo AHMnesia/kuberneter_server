@@ -1,0 +1,66 @@
+{
+  "uid": "kubernetes-nodes",
+  "title": "Kubernetes Nodes Metrics",
+  "tags": ["kubernetes", "nodes", "resources"],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "title": "Node Status (Up)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "up{job=\"kubernetes-nodes\"}",
+          "legendFormat": "Node Up",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Node CPU Usage (%)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "100 - avg(irate(node_cpu_seconds_total{job=\"kubernetes-nodes\",mode=\"idle\"}[5m])) by (instance) * 100",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "CPU Usage (%)", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Node Memory Usage (MB)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "(node_memory_MemTotal_bytes{job=\"kubernetes-nodes\"} - node_memory_MemAvailable_bytes{job=\"kubernetes-nodes\"}) / 1024 / 1024",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Memory (MB)", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Node Filesystem Usage (GB)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "(node_filesystem_size_bytes{job=\"kubernetes-nodes\",mountpoint=\"/\"} - node_filesystem_free_bytes{job=\"kubernetes-nodes\",mountpoint=\"/\"}) / 1024 / 1024 / 1024",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Disk Used (GB)", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" }
+}

@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: suma-android-pdb
+  namespace: suma-android
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: suma-android
