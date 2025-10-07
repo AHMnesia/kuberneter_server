@@ -1,0 +1,51 @@
+{
+  "uid": "kubernetes-standard",
+  "title": "Kubernetes Standard Metrics",
+  "tags": ["kubernetes", "cluster", "resources"],
+  "panels": [
+    {
+      "type": "graph",
+      "title": "API Server Up",
+      "targets": [{"expr": "up{job=\"kubernetes-apiservers\"}", "legendFormat": "API Server"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 6}
+    },
+    {
+      "type": "graph",
+      "title": "Node Up",
+      "targets": [{"expr": "up{job=\"kubernetes-nodes\"}", "legendFormat": "Node"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 6}
+    },
+    {
+      "type": "graph",
+      "title": "Cadvisor Container CPU Usage",
+      "targets": [{"expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\"}[5m])) by (instance)", "legendFormat": "{{instance}}"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 6}
+    },
+    {
+      "type": "graph",
+      "title": "Cadvisor Container Memory Usage",
+      "targets": [{"expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\"}) by (instance)", "legendFormat": "{{instance}}"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 6}
+    },
+    {
+      "type": "graph",
+      "title": "Node Exporter CPU Usage",
+      "targets": [{"expr": "100 - avg(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100", "legendFormat": "CPU Usage"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 6}
+    },
+    {
+      "type": "graph",
+      "title": "Node Exporter Memory Usage",
+      "targets": [{"expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes", "legendFormat": "Memory Used"}],
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 6}
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" }
+}
+

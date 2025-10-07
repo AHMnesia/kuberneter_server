@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "suma-pmo.fullname" . }}
+  labels:
+    {{- include "suma-pmo.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port | default 8000 }}
+      targetPort: {{ .Values.service.port | default 8000 }}
+      protocol: TCP
+  selector:
+    {{- include "suma-pmo.selectorLabels" . | nindent 4 }}

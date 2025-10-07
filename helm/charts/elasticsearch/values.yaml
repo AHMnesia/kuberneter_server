@@ -1,0 +1,140 @@
+replicaCount: 3
+
+namespace: elasticsearch
+
+image:
+  repository: docker.elastic.co/elasticsearch/elasticsearch
+  tag: 8.7.0
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+resources:
+  requests:
+    cpu: "300m"
+    memory: "512Mi"
+  limits:
+    cpu: "800m"
+    memory: "1Gi"
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 10Gi
+
+# Elasticsearch Configuration
+config:
+  clusterName: suma-elasticsearch
+  nodeGroup: "master"
+  roles: ["master", "data", "ingest"]
+  heapSize: "512m"
+  esJavaOpts: "-Xms512m -Xmx512m"
+
+# Security
+security:
+  enabled: true  # Enabled with self-signed certs
+  tls:
+    enabled: true
+    certificates:
+      selfsigned:
+        enabled: true
+      ca:
+        enabled: true
+      node:
+        enabled: true
+
+# Health Probes
+startupProbe:
+  enabled: true
+  periodSeconds: 10
+  failureThreshold: 60
+  timeoutSeconds: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 6
+  timeoutSeconds: 5
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 20
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  allowedNamespaces:
+    - kibana
+    - suma-ecommerce
+    - suma-office
+    - suma-android
+    - suma-pmo
+    - ingress-nginx
+    - nginx-system
+
+# Service
+service:
+  type: ClusterIP
+  port: 9200
+  createClient: true
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - name: local
+      host: search.suma-honda.local
+      tls: true
+      tlsSecret: elasticsearch-tls
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      paths:
+        - path: /suma-search
+          pathType: Prefix
+        - path: /
+          pathType: Prefix
+    - name: api
+      host: api.suma-honda.id
+      tls: true
+      tlsSecret: api-suma-honda-id-tls
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      paths:
+        - path: /search(/|$)(.*)
+          pathType: ImplementationSpecific
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+certificate:
+  enabled: true
+  certificates:
+    - name: elasticsearch-certs
+      secretName: elasticsearch-certs
+      issuerRef:
+        name: suma-ca-issuer
+        kind: ClusterIssuer
+      dnsNames:
+        - elasticsearch
+        - elasticsearch.elasticsearch
+        - elasticsearch.elasticsearch.svc
+        - elasticsearch.elasticsearch.svc.cluster.local
+        - "*.elasticsearch.elasticsearch.svc.cluster.local"

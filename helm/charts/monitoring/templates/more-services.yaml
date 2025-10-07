@@ -1,0 +1,104 @@
+{{- if .Values.loki }}
+{{- if .Values.loki.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-loki
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.loki.service.type | default "ClusterIP" }}
+  ports:
+    - name: web
+      port: {{ .Values.loki.service.port | default 3100 }}
+      targetPort: {{ .Values.loki.service.port | default 3100 }}
+      protocol: TCP
+  selector:
+    app: loki
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-alertmanager
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.alertmanager.service.type | default "ClusterIP" }}
+  ports:
+    - name: web
+      port: {{ .Values.alertmanager.service.port | default 9093 }}
+      targetPort: {{ .Values.alertmanager.service.port | default 9093 }}
+      protocol: TCP
+  selector:
+    app: alertmanager
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-blackbox-exporter
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.blackbox.service.type | default "ClusterIP" }}
+  ports:
+    - name: web
+      port: {{ .Values.blackbox.service.port | default 9115 }}
+      targetPort: {{ .Values.blackbox.service.port | default 9115 }}
+      protocol: TCP
+  selector:
+    app: blackbox-exporter
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-node-exporter
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.nodeExporter.service.type | default "ClusterIP" }}
+  ports:
+    - name: metrics
+      port: {{ .Values.nodeExporter.service.port | default 9100 }}
+      targetPort: {{ .Values.nodeExporter.service.port | default 9100 }}
+      protocol: TCP
+  selector:
+    app: node-exporter
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-elasticsearch-exporter
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.esExporter.service.type | default "ClusterIP" }}
+  ports:
+    - name: metrics
+      port: {{ .Values.esExporter.service.port | default 9114 }}
+      targetPort: {{ .Values.esExporter.service.port | default 9114 }}
+      protocol: TCP
+  selector:
+    app: elasticsearch-exporter
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "monitoring.fullname" . }}-redis-exporter
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.redisExporter.service.type | default "ClusterIP" }}
+  ports:
+    - name: metrics
+      port: {{ .Values.redisExporter.service.port | default 9121 }}
+      targetPort: {{ .Values.redisExporter.service.port | default 9121 }}
+      protocol: TCP
+  selector:
+    app: redis-exporter
+{{- end }}
+{{- end }}

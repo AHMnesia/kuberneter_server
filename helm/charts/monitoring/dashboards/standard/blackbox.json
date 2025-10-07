@@ -1,0 +1,82 @@
+{
+  "uid": "blackbox",
+  "title": "Blackbox Exporter Metrics",
+  "tags": ["blackbox", "exporter", "monitoring"],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "title": "Blackbox Up",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "up{job=\"blackbox\"}",
+          "legendFormat": "Blackbox Up",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Scrape Duration (Seconds)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "scrape_duration_seconds{job=\"blackbox\"}",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Duration (s)", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Scrape Success",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "scrape_success{job=\"blackbox\"}",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Success", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Probe Duration (Seconds)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "probe_duration_seconds{job=\"blackbox\"}",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Duration (s)", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Probe Success",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "probe_success{job=\"blackbox\"}",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "yAxes": [
+        { "label": "Success", "min": 0 }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" }
+}
+

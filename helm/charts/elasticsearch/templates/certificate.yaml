@@ -1,0 +1,20 @@
+{{- if .Values.certificate.enabled }}
+{{- range .Values.certificate.certificates }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace | default "elasticsearch" }}
+  labels:
+    {{- include "elasticsearch.labels" $ | nindent 4 }}
+spec:
+  secretName: {{ .secretName }}
+  issuerRef:
+    name: {{ .issuerRef.name }}
+    kind: {{ .issuerRef.kind | default "ClusterIssuer" }}
+    group: cert-manager.io
+  dnsNames:
+    {{- toYaml .dnsNames | nindent 4 }}
+{{- end }}
+{{- end }}

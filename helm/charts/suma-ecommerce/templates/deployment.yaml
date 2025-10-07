@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "suma-ecommerce.fullname" . }}
+  namespace: {{ .Values.namespace | default "suma-ecommerce" }}
+  labels:
+    {{- include "suma-ecommerce.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 3 }}
+  selector:
+    matchLabels:
+      {{- include "suma-ecommerce.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "suma-ecommerce.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "suma-ecommerce.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: {{ .Values.workingDir | default "/var/www/html" }}
+          command: {{ .Values.command | default (list "php" "artisan" "serve" "--host=0.0.0.0" "--port=8000") | toJson }}
+          env:
+            - name: APP_ENV
+              value: {{ .Values.config.appEnv | quote }}
+            - name: APP_DEBUG
+              value: {{ .Values.config.appDebug | quote }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+          {{- range .Values.persistence.volumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.path | default "/" }}
+              port: 8000
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds | default 10 }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold | default 30 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path | default "/" }}
+              port: 8000
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 60 }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 10 }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 3 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path | default "/" }}
+              port: 8000
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 3 }}
+          {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+      {{- range .Values.persistence.volumes }}
+      - name: {{ .name }}
+        persistentVolumeClaim:
+          claimName: {{ include "suma-ecommerce.fullname" $ }}-{{ .name }}
+      {{- end }}
+      {{- end }}

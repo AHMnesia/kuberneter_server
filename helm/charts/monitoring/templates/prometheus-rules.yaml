@@ -1,0 +1,54 @@
+{{- if .Values.configMap.prometheusRules.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring.fullname" . }}-prometheus-rules
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  alert.rules: |-
+    groups:
+    - name: kubernetes
+      rules:
+      - alert: HighCPUUsage
+        expr: sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage for pod {{ "{{ $labels.pod }}" }}
+          
+      - alert: HighMemoryUsage
+        expr: sum(container_memory_usage_bytes{container!=""}) by (pod) / sum(container_spec_memory_limit_bytes{container!=""}) by (pod) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage for pod {{ "{{ $labels.pod }}" }}
+
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: Pod {{ "{{ $labels.pod }}" }} is crash looping
+
+    - name: nodes
+      rules:
+      - alert: NodeNotReady
+        expr: kube_node_status_condition{condition="Ready",status!="true"} == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Node {{ "{{ $labels.node }}" }} is not ready
+
+      - alert: NodeDiskPressure
+        expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Node {{ "{{ $labels.node }}" }} is under disk pressure
+{{- end }}

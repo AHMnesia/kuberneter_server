@@ -1,0 +1,25 @@
+{{- if .Values.persistence.enabled }}
+{{- range .Values.persistence.volumes }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "suma-office.fullname" $ }}-{{ .name }}
+  namespace: {{ $.Values.namespace | default "suma-office" }}
+  labels:
+    {{- include "suma-office.labels" $ | nindent 4 }}
+    component: {{ .name }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .accessModes | nindent 4 }}
+  storageClassName: {{ .storageClassName | default "standard" }}
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .size }}
+{{- end }}
+{{- end }}

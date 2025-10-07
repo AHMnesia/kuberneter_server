@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "suma-chat.fullname" . }}
+  namespace: {{ .Values.namespace | default "suma-chat" }}
+  labels:
+    {{- include "suma-chat.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port | default 80 }}
+      targetPort: {{ .Values.config.port | default 4000 }}
+      protocol: TCP
+  selector:
+    {{- include "suma-chat.selectorLabels" . | nindent 4 }}

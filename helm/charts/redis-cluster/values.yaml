@@ -1,0 +1,33 @@
+namespace: redis
+
+replicaCount: 3
+
+image:
+  repository: redis
+  tag: 7.2-alpine
+  pullPolicy: IfNotPresent
+
+service:
+  port: 6379
+  headless: true
+
+cluster:
+  enabled: true
+  nodeTimeout: 5000
+
+config:
+  maxmemory: 256mb
+  maxmemoryPolicy: allkeys-lru
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: standard
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

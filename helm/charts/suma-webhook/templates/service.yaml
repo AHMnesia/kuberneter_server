@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "suma-webhook.fullname" . }}
+  namespace: {{ .Values.namespace | default "suma-webhook" }}
+  labels:
+    {{- include "suma-webhook.labels" . | nindent 4 }}
+spec:
+  # Headless service (no ClusterIP) with manual endpoints
+  # This allows routing to external webhook running on host
+  clusterIP: None
+  ports:
+    - name: http
+      port: {{ .Values.service.port | default 5000 }}
+      targetPort: {{ .Values.service.port | default 5000 }}
+      protocol: TCP
+  # No selector - endpoints defined manually in endpoints.yaml

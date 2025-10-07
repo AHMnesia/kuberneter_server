@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "suma-office.fullname" . }}
+  labels:
+    {{- include "suma-office.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "suma-office.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "suma-office.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "suma-office.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: APP_NAME
+              value: {{ .Values.config.appName }}
+            - name: APP_ENV
+              value: {{ .Values.config.appEnv }}
+            - name: APP_DEBUG
+              value: {{ .Values.config.appDebug | quote }}
+            - name: APP_URL
+              value: {{ .Values.config.appUrl }}
+            - name: DB_CONNECTION
+              value: {{ .Values.config.dbConnection }}
+            - name: CACHE_DRIVER
+              value: {{ .Values.config.cacheDriver }}
+            - name: QUEUE_CONNECTION
+              value: {{ .Values.config.queueConnection }}
+            - name: ELASTICSEARCH_HOSTS
+              value: {{ .Values.config.elasticsearchHosts }}
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "suma-office.fullname" . }}-config
+                  key: timezone
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage
+            - name: php-config
+              mountPath: /usr/local/etc/php/conf.d/custom.ini
+              subPath: custom.ini
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ include "suma-office.fullname" . }}-storage
+        - name: php-config
+          configMap:
+            name: {{ include "suma-office.fullname" . }}-config

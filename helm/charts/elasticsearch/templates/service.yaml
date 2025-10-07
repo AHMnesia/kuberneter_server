@@ -1,0 +1,37 @@
+{{- if .Values.service.createClient }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "elasticsearch.fullname" . }}
+  labels:
+    {{- include "elasticsearch.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "elasticsearch.selectorLabels" . | nindent 4 }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "elasticsearch.fullname" . }}-headless
+  labels:
+    {{- include "elasticsearch.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: 9200
+      targetPort: 9200
+      protocol: TCP
+      name: http
+    - port: 9300
+      targetPort: 9300
+      protocol: TCP
+      name: transport
+  selector:
+    {{- include "elasticsearch.selectorLabels" . | nindent 4 }}

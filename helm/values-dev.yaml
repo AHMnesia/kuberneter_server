@@ -1,0 +1,164 @@
+# Development Environment Values
+global:
+  kibana:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  security:
+    enabled: true
+    tls:
+      enabled: true
+  certificate:
+    enabled: true
+    certificates:
+      - name: kibana-certs
+        secretName: kibana-certs
+        issuerRef:
+          name: selfsigned-cluster-issuer
+          kind: ClusterIssuer
+        dnsNames:
+          - kibana
+          - kibana.kibana
+          - kibana.kibana.svc
+          - kibana.kibana.svc.cluster.localevelopment
+  domain: dev.suma-honda.id
+  storage:
+    class: standard
+
+# Redis Cluster (Global)
+redis-cluster:
+  enabled: true
+  namespace: redis
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: standard
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Elasticsearch
+elasticsearch:
+  replicaCount: 1  # Changed from 'replicas' to match chart template
+  resources:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 800m
+      memory: 1Gi
+  config:
+    heapSize: "512m"
+    esJavaOpts: "-Xms512m -Xmx512m"
+  persistence:
+    size: 10Gi
+  security:
+    enabled: true
+    tls:
+      enabled: true
+  certificate:
+    enabled: true
+    certificates:
+      - name: elasticsearch-certs
+        secretName: elasticsearch-certs
+        issuerRef:
+          name: selfsigned-cluster-issuer
+          kind: ClusterIssuer
+        dnsNames:
+          - elasticsearch
+          - elasticsearch.elasticsearch
+          - elasticsearch.elasticsearch.svc
+          - elasticsearch.elasticsearch.svc.cluster.local
+          - "*.elasticsearch.elasticsearch.svc.cluster.local"
+
+# Kibana
+kibana:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  security:
+    enabled: true
+    tls:
+      enabled: true
+  certificate:
+    enabled: true
+    certificates:
+      - name: kibana-certs
+        secretName: kibana-certs
+        issuerRef:
+          name: selfsigned-cluster-issuer
+          kind: ClusterIssuer
+        dnsNames:
+          - kibana
+          - kibana.kibana
+          - kibana.kibana.svc
+          - kibana.kibana.svc.cluster.local
+
+# Suma E-commerce
+suma-ecommerce:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  config:
+    appDebug: true
+  database:
+    host: dev-db-host
+    port: 3306
+    name: suma_ecommerce_dev
+    username: dev_user
+    password: dev_password
+
+# Suma Office
+suma-office:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  config:
+    appDebug: true
+
+# Suma Chat
+suma-chat:
+  enabled: true
+  replicas: 1
+  redis:
+    persistence:
+      size: 5Gi
+
+# Monitoring
+monitoring:
+  enabled: false  # Disabled for dev - monitoring chart needs fixes
+  prometheus:
+    retention: 5d
+    storage:
+      size: 20Gi
+  grafana:
+    adminPassword: admin

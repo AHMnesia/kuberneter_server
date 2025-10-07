@@ -1,0 +1,16 @@
+{{- if .Values.endpoints.enabled }}
+# Manual Endpoints pointing to webhook running on host
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ include "suma-webhook.fullname" . }}
+  namespace: {{ .Values.namespace | default "suma-webhook" }}
+  labels:
+    {{- include "suma-webhook.labels" . | nindent 4 }}
+subsets:
+  - addresses:
+      - ip: {{ .Values.endpoints.ip }}  # Host IP where webhook runs
+    ports:
+      - port: {{ .Values.endpoints.port }}
+        protocol: TCP
+{{- end }}

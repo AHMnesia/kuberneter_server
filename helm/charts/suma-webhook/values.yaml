@@ -1,0 +1,54 @@
+# Suma Webhook Configuration
+# NOTE: Webhook application runs on HOST (not in Kubernetes)
+# This chart only creates Service/Endpoints/Ingress to route traffic to the host
+
+# Deployment disabled - webhook runs on host
+deployment:
+  enabled: false
+
+namespace: suma-webhook
+
+# Image config (not used, but kept for reference)
+image:
+  repository: suma-webhook
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Service configuration - headless service with manual endpoints
+service:
+  type: ClusterIP
+  port: 5000  # Port on host where webhook is running
+
+# Endpoints configuration - points to webhook running on host
+endpoints:
+  enabled: true
+  name: suma-webhook
+  ip: 192.168.1.125  # Host IP where webhook is running
+  port: 5000         # Port where webhook listens on host
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts:
+    - host: webhook.suma-honda.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: suma-webhook-tls
+      hosts:
+        - webhook.suma-honda.local
+
+certificate:
+  enabled: true
+  certificates:
+    - name: suma-webhook-local-tls
+      secretName: suma-webhook-tls
+      issuerRef:
+        name: selfsigned-cluster-issuer
+        kind: ClusterIssuer
+      dnsNames:
+        - webhook.suma-honda.local

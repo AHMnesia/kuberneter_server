@@ -1,0 +1,6 @@
+apiVersion: v2
+name: suma-pmo
+description: Helm chart for suma-pmo application
+type: application
+version: 0.1.0
+appVersion: "1.0"

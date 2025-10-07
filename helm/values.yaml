@@ -1,0 +1,81 @@
+# Global values shared across all charts
+global:
+  environment: production
+  domain: suma-honda.id
+  storage:
+    class: standard
+
+  # Image pull configuration
+  image:
+    registry: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+
+  # Network policies
+  networkPolicy:
+    enabled: true
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+# Individual chart values will be merged with these defaults
+elasticsearch:
+  enabled: true
+  replicas: 3
+  heap: "2g"
+  storage:
+    size: 30Gi
+
+kibana:
+  enabled: true
+  replicas: 1
+
+suma-ecommerce:
+  enabled: true
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+suma-office:
+  enabled: true
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+suma-chat:
+  enabled: true
+  replicas: 2
+  redis:
+    enabled: true
+    persistence:
+      size: 8Gi
+
+monitoring:
+  enabled: true
+  prometheus:
+    retention: 15d
+    storage:
+      size: 50Gi
+  grafana:
+    adminPassword: admin  # Change this in production
+    persistence:
+      size: 10Gi

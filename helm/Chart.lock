@@ -1,0 +1,33 @@
+dependencies:
+- name: redis-cluster
+  repository: file://charts/redis-cluster
+  version: 0.1.0
+- name: elasticsearch
+  repository: file://charts/elasticsearch
+  version: 0.1.0
+- name: kibana
+  repository: file://charts/kibana
+  version: 0.1.0
+- name: suma-android
+  repository: file://charts/suma-android
+  version: 0.1.0
+- name: suma-ecommerce
+  repository: file://charts/suma-ecommerce
+  version: 0.1.0
+- name: suma-office
+  repository: file://charts/suma-office
+  version: 0.1.0
+- name: suma-pmo
+  repository: file://charts/suma-pmo
+  version: 0.1.0
+- name: suma-chat
+  repository: file://charts/suma-chat
+  version: 0.1.0
+- name: suma-webhook
+  repository: file://charts/suma-webhook
+  version: 0.1.0
+- name: monitoring
+  repository: file://charts/monitoring
+  version: 0.1.0
+digest: sha256:0637069f8f787903bb3c914731399f16e79f432a7422e88c5776362d619a341c
+generated: "2025-10-07T10:25:12.4917159+07:00"
