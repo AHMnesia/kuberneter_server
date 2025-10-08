@@ -1,6 +1,0 @@
-apiVersion: v2
-name: suma-chat
-description: Suma Chat Service Helm chart
-type: application
-version: 0.1.0
-appVersion: "1.0.0"
