@@ -2,23 +2,122 @@ param(
     [string]$VERSION = 'v1.0.0'
 )
 
-# Menu: Pilih service yang ingin dideploy
-$services = @(
-    @{ Name = 'Suma Ecommerce'; RepoPath = 'suma-ecommerce'; K8sPath = 'suma-ecommerce'; Image = 'suma-ecommerce-api'; Dockerfile = 'dockerfile' },
-    @{ Name = 'Suma Office'; RepoPath = 'suma-office'; K8sPath = 'suma-office'; Image = 'suma-office-api'; Dockerfile = 'dockerfile.api' },
-    @{ Name = 'Suma Office General'; RepoPath = 'suma-office'; K8sPath = 'suma-office-general'; Image = 'suma-office-general-api'; Dockerfile = 'dockerfile.api' },
-    @{ Name = 'Suma Android'; RepoPath = 'suma-android'; K8sPath = 'suma-android'; Image = 'suma-android-api'; Dockerfile = 'dockerfile' },
-    @{ Name = 'Suma PMO'; RepoPath = 'suma-pmo'; K8sPath = 'suma-pmo'; Image = 'suma-pmo-api'; Dockerfile = 'dockerfile' },
-    @{ Name = 'Suma Chat'; RepoPath = 'suma-chat'; K8sPath = 'suma-chat'; Image = 'suma-chat'; Dockerfile = 'dockerfile' }
-)
+function Test-ServiceDeployed {
+    param(
+        [Parameter(Mandatory=$true)]
+        [hashtable]$Service
+    )
 
-Write-Host '=== Pilih Service yang akan dideploy ===' -ForegroundColor Cyan
-for ($i=0; $i -lt $services.Count; $i++) {
-    Write-Host ("[$i] {0}" -f $services[$i].Name) -ForegroundColor Yellow
+    $deployment = $Service.Deployment
+    $namespace = $Service.Namespace
+    if (-not $deployment -or -not $namespace) { return $false }
+
+    try {
+        $result = kubectl get deployment $deployment -n $namespace --ignore-not-found -o name 2>$null
+        if ($LASTEXITCODE -ne 0) { return $false }
+        return -not [string]::IsNullOrWhiteSpace($result)
+    } catch {
+        return $false
+    }
 }
 
-$selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3)'
-$selectedIdx = $selected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
+function Wait-ElasticsearchPodsReady {
+    param(
+        [int]$TimeoutSeconds = 300
+    )
+
+    $elapsed = 0
+    while ($elapsed -lt $TimeoutSeconds) {
+        try {
+            $podsJson = kubectl get pods -n elasticsearch -l app=elasticsearch -o json 2>$null
+            if ($LASTEXITCODE -eq 0 -and $podsJson) {
+                $pods = $podsJson | ConvertFrom-Json
+                if ($pods -and $pods.items -and $pods.items.Count -gt 0) {
+                    $allReady = $true
+                    foreach ($pod in $pods.items) {
+                        $readyCond = $pod.status.conditions | Where-Object { $_.type -eq 'Ready' }
+                        if (-not ($readyCond -and $readyCond.status -eq 'True')) { $allReady = $false; break }
+                    }
+                    if ($allReady) { return $true }
+                }
+            }
+        } catch {
+            # Abaikan error sementara (misalnya pod belum dibuat)
+        }
+
+        Start-Sleep -Seconds 5
+        $elapsed += 5
+    }
+
+    return $false
+}
+
+# Menu: Pilih service yang ingin dideploy (atau pilih opsi Infrastruktur saja)
+$services = @(
+    @{ Name = 'Suma Ecommerce'; RepoPath = 'suma-ecommerce'; K8sPath = 'suma-ecommerce'; Image = 'suma-ecommerce-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-ecommerce'; Deployment = 'suma-ecommerce-api' },
+    @{ Name = 'Suma Office'; RepoPath = 'suma-office'; K8sPath = 'suma-office'; Image = 'suma-office-api'; Dockerfile = 'dockerfile.api'; Namespace = 'suma-office'; Deployment = 'suma-office-api' },
+    @{ Name = 'Suma Office General'; RepoPath = 'suma-office'; K8sPath = 'suma-office-general'; Image = 'suma-office-general-api'; Dockerfile = 'dockerfile.api'; Namespace = 'suma-office-general'; Deployment = 'suma-office-general-api' },
+    @{ Name = 'Suma Android'; RepoPath = 'suma-android'; K8sPath = 'suma-android'; Image = 'suma-android-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-android'; Deployment = 'suma-android-api' },
+    @{ Name = 'Suma PMO'; RepoPath = 'suma-pmo'; K8sPath = 'suma-pmo'; Image = 'suma-pmo-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-pmo'; Deployment = 'suma-pmo-api' },
+    @{ Name = 'Suma Chat'; RepoPath = 'suma-chat'; K8sPath = 'suma-chat'; Image = 'suma-chat'; Dockerfile = 'dockerfile'; Namespace = 'suma-chat'; Deployment = 'suma-chat' }
+)
+    $elasticReady = $false
+    $elasticsearchApplied = $false
+    $shouldDeployKibanaLater = $false
+    $skipElasticWait = $false
+    $deployInfraOnly = $false
+
+Write-Host 'Mendeteksi service yang sudah terdeploy...' -ForegroundColor Cyan
+$availableServices = @()
+$skippedServices = @()
+foreach ($svc in $services) {
+    if (Test-ServiceDeployed -Service $svc) {
+        $skippedServices += $svc
+    } else {
+        $availableServices += $svc
+    }
+}
+if ($skippedServices.Count -gt 0) {
+    Write-Host 'Service berikut sudah terdeteksi di cluster dan akan disembunyikan dari pilihan:' -ForegroundColor Yellow
+    foreach ($svc in $skippedServices) {
+        Write-Host (" - {0} (namespace: {1})" -f $svc.Name, $svc.Namespace) -ForegroundColor DarkYellow
+    }
+}
+
+$selectedServices = @()
+$selectedIdx = @()
+$selectedNames = [System.Collections.Generic.HashSet[string]]::new()
+# HashSet untuk menandai folder k8s service yang dipilih (dipakai saat apply resource infra opsional)
+$selectedK8sPaths = [System.Collections.Generic.HashSet[string]]::new()
+if ($availableServices.Count -gt 0) {
+    Write-Host '=== Pilih Service yang akan dideploy ===' -ForegroundColor Cyan
+    for ($i=0; $i -lt $availableServices.Count; $i++) {
+        Write-Host ("[$i] {0}" -f $availableServices[$i].Name) -ForegroundColor Yellow
+    }
+    Write-Host '[I] Deploy Infrastruktur saja (tanpa service apapun)' -ForegroundColor Yellow
+    $selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3) atau ketik I untuk Infrastruktur saja'
+    if ($selected.Trim().ToUpperInvariant() -eq 'I') {
+        $deployInfraOnly = $true
+        $selectedIdx = @()
+    } else {
+        $selectedIdx = $selected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
+    }
+    foreach ($idx in $selectedIdx) {
+        if ($idx -ge 0 -and $idx -lt $availableServices.Count) {
+            $svcObj = $availableServices[$idx]
+            if ($selectedNames.Add($svcObj.Name)) {
+                $selectedServices += $svcObj
+                $null = $selectedK8sPaths.Add($svcObj.K8sPath.ToLower())
+            } else {
+                Write-Host ("Duplikasi pilihan diabaikan: {0}" -f $svcObj.Name) -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
+        }
+    }
+} else {
+    Write-Host 'Semua service sudah terdeploy. Lewati tahap pemilihan service.' -ForegroundColor Yellow
+}
 
 # Deploy Infrastruktur (selalu otomatis)
 Write-Host '=== Deploy Infrastruktur (Otomatis) ===' -ForegroundColor Green
@@ -158,13 +257,8 @@ if (Test-Path $monitoringRbac) {
     try { kubectl apply -f $monitoringRbac } catch { Write-Host ('Warning: gagal apply monitoring/rbac.yaml ({0})' -f $_.Exception.Message) -ForegroundColor Yellow }
 }
 
-# 5. PersistentVolumeClaims
+# 5. PersistentVolumeClaims (hanya resource infra default)
 $pvcFiles = @(
-    'suma-ecommerce/pvc.yaml',
-    'suma-office/pvc.yaml',
-    'suma-office-general/pvc.yaml',
-    'suma-android/pvc.yaml',
-    'suma-pmo/pvc.yaml',
     'monitoring/pvc.yaml'
 )
 foreach ($relPath in $pvcFiles) {
@@ -289,10 +383,6 @@ foreach ($secretName in $certManagerSecrets.Keys) {
 }
 
 # 9. ConfigMap dan monitoring stack
-$officeConfig = Join-Path $PSScriptRoot 'suma-office\configmap.yaml'
-if (Test-Path $officeConfig) { Write-Host 'Mengapply suma-office/configmap.yaml...' -ForegroundColor Cyan; kubectl apply -f $officeConfig }
-$officeGenConfig = Join-Path $PSScriptRoot 'suma-office-general\configmap.yaml'
-if (Test-Path $officeGenConfig) { Write-Host 'Mengapply suma-office-general/configmap.yaml...' -ForegroundColor Cyan; kubectl apply -f $officeGenConfig }
 $monitoringConfig = Join-Path $PSScriptRoot 'monitoring\configmap.yaml'
 if (Test-Path $monitoringConfig) { Write-Host 'Mengapply monitoring/configmap.yaml...' -ForegroundColor Cyan; kubectl apply -f $monitoringConfig }
 
@@ -313,6 +403,9 @@ if (Test-Path $monitoringDeploy) { Write-Host 'Mengapply monitoring/deployment.y
 
 $monitoringSvc = Join-Path $PSScriptRoot 'monitoring\service.yaml'
 if (Test-Path $monitoringSvc) { Write-Host 'Mengapply monitoring/service.yaml...' -ForegroundColor Cyan; kubectl apply -f $monitoringSvc }
+
+$monitoringIngress = Join-Path $PSScriptRoot 'monitoring\ingress.yaml'
+if (Test-Path $monitoringIngress) { Write-Host 'Mengapply monitoring/ingress.yaml...' -ForegroundColor Cyan; kubectl apply -f $monitoringIngress }
 
 # 9.5. Elasticsearch certificates & issuers
 $esCertDir = Join-Path $PSScriptRoot 'elasticsearch'
@@ -354,56 +447,181 @@ if (Test-Path $esCertDir) {
     } catch {
         Write-Host 'Certificate elasticsearch-node-cert belum Ready setelah 120s.' -ForegroundColor Yellow
     }
+
+    # Pastikan secret elasticsearch-ssl tersedia sebelum StatefulSet dijalankan
+    $esTlsSecretReady = $false
+    $elapsed = 0
+    while ($elapsed -lt 120) {
+        $secret = kubectl get secret elasticsearch-ssl -n elasticsearch --ignore-not-found -o name 2>$null
+        if ($secret) { $esTlsSecretReady = $true; break }
+        Start-Sleep -Seconds 5
+        $elapsed += 5
+    }
+    if ($esTlsSecretReady) {
+        Write-Host 'Secret elasticsearch-ssl tersedia.' -ForegroundColor Green
+    } else {
+        Write-Host 'WARNING: Secret elasticsearch-ssl belum ditemukan. StatefulSet mungkin gagal saat mount SSL.' -ForegroundColor Yellow
+    }
 }
 
-# 10. Elasticsearch & Kibana sebagai bagian infra
+# 10. Elasticsearch sebagai bagian infra (Kibana akan dieksekusi di tahap akhir)
 $esFolder = Join-Path $PSScriptRoot 'elasticsearch'
+$kibanaFolderPath = Join-Path $PSScriptRoot 'kibana'
 if (Test-Path $esFolder) {
+    $elasticsearchApplied = $true
+    if (Test-Path $kibanaFolderPath) { $shouldDeployKibanaLater = $true }
+
     Write-Host 'Deploying Elasticsearch...' -ForegroundColor Cyan
     $esStateful = Join-Path $esFolder 'statefulset.yaml'
     $esService = Join-Path $esFolder 'service.yaml'
+    $esNetworkPolicy = Join-Path $esFolder 'networkpolicy.yaml'
+    $esPdb = Join-Path $esFolder 'poddisruptionbudget.yaml'
+    $esIngress = Join-Path $esFolder 'ingress.yaml'
     if (Test-Path $esStateful) { kubectl apply -f $esStateful }
     if (Test-Path $esService) { kubectl apply -f $esService }
+    if (Test-Path $esPdb) { kubectl apply -f $esPdb }
+    if (Test-Path $esNetworkPolicy) { kubectl apply -f $esNetworkPolicy }
+    if (Test-Path $esIngress) { kubectl apply -f $esIngress }
 
-    $esReady = $false
-    Write-Host 'Menunggu Elasticsearch pods Ready (timeout 120s)...' -ForegroundColor Yellow
-    try {
-        kubectl wait --for=condition=Ready pods -l app=elasticsearch -n elasticsearch --timeout=120s 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            $esReady = $true
-            Write-Host 'Elasticsearch pods Ready.' -ForegroundColor Green
-        }
-    } catch {
-        Write-Host 'kubectl wait tidak menemukan pods Elasticsearch, melakukan polling manual...' -ForegroundColor Yellow
+    # Defer waiting for the Elasticsearch rollout here — we'll verify readiness later (before deploying Kibana/creating users)
+    Write-Host 'Melewatkan penantian immediate rollout untuk Elasticsearch. Verifikasi readiness akan dilakukan sebelum deploy Kibana.' -ForegroundColor Yellow
+    $rolloutSucceeded = $false
+    $elasticReady = $false
+} else {
+    Write-Host 'Folder elasticsearch/ tidak ditemukan, melewati deployment Elasticsearch.' -ForegroundColor Yellow
+    if (Test-Path $kibanaFolderPath) {
+        $shouldDeployKibanaLater = $true
+        Write-Host 'Catatan: Kibana ditemukan namun akan dilewati karena Elasticsearch tidak tersedia.' -ForegroundColor Yellow
     }
+}
 
-    if (-not $esReady) {
-        $elapsed = 0
-        while ($elapsed -lt 120) {
-            $pods = kubectl get pods -n elasticsearch -l app=elasticsearch -o json 2>$null | ConvertFrom-Json
-            if ($pods -and $pods.items) {
-                $allReady = $true
-                foreach ($pod in $pods.items) {
-                    $readyCond = $pod.status.conditions | Where-Object { $_.type -eq 'Ready' }
-                    if (-not ($readyCond -and $readyCond.status -eq 'True')) { $allReady = $false; break }
-                }
-                if ($allReady) { $esReady = $true; break }
+# Konfirmasi sebelum lanjut deploy service
+Write-Host ''
+Write-Host '=== Infrastruktur selesai. Lanjut deploy service yang dipilih? ===' -ForegroundColor Green
+if ($deployInfraOnly) {
+    Write-Host 'Opsi "Deploy Infrastruktur saja" dipilih. Melanjutkan ke langkah akhir (Kibana dan post-infra).' -ForegroundColor Green
+    # Do not exit; we skip service deployment but still run Kibana and post-infra scripts
+    $lanjut = 'Y'
+} else {
+    $lanjut = Read-Host 'Ketik Y untuk lanjut, N untuk batal (Y/N)'
+    if ($lanjut -notmatch '^[Yy]$') {
+        Write-Host 'Deployment service dibatalkan.' -ForegroundColor Yellow
+        exit 0
+    }
+}
+
+# Deploy Service yang dipilih
+if (-not $selectedServices -or $selectedServices.Count -eq 0) {
+    Write-Host 'Tidak ada service dipilih. Hanya infrastruktur yang dijalankan.' -ForegroundColor Yellow
+}
+
+foreach ($svc in $selectedServices) {
+    $repoDir = Join-Path $root $svc.RepoPath
+    $k8sDir = Join-Path $PSScriptRoot $svc.K8sPath
+    Write-Host ("=== Deploying {0} ===" -f $svc.Name) -ForegroundColor Cyan
+
+    if (Test-Path $repoDir) {
+        Push-Location $repoDir
+        $dockerfilePath = $svc.Dockerfile
+        if (-not (Test-Path $dockerfilePath)) {
+            Write-Host ("Dockerfile {0} tidak ditemukan di {1}. Lewati build." -f $dockerfilePath, $repoDir) -ForegroundColor Yellow
+        } else {
+            docker build -t "$($svc.Image):$VERSION" -f $dockerfilePath .
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "Error building $($svc.Image)." -ForegroundColor Red
+                Pop-Location
+                continue
             }
-            Start-Sleep -Seconds 5
-            $elapsed += 5
+            docker tag "$($svc.Image):$VERSION" "$($svc.Image):latest"
         }
-        if ($esReady) { Write-Host 'Elasticsearch pods Ready.' -ForegroundColor Green } else { Write-Host 'Timeout menunggu Elasticsearch pods Ready.' -ForegroundColor Yellow }
+        Pop-Location
+    } else {
+        Write-Host ("Folder repository tidak ditemukan: {0}" -f $repoDir) -ForegroundColor Yellow
     }
 
-    $kibanaFolder = Join-Path $PSScriptRoot 'kibana'
-    if (Test-Path $kibanaFolder) {
-        if ($esReady) {
+    if (Test-Path $k8sDir) {
+        if ($svc.Namespace) {
+            try {
+                kubectl create namespace $svc.Namespace --dry-run=client -o yaml | kubectl apply -f - | Out-Null
+            } catch {
+                Write-Host ("Warning: gagal memastikan namespace {0}: {1}" -f $svc.Namespace, $_.Exception.Message) -ForegroundColor Yellow
+            }
+        }
+
+        $namespaceManifest = Get-ChildItem -Path $k8sDir -Filter 'namespace.yaml' -Recurse -File | Select-Object -First 1
+        if ($namespaceManifest) {
+            Write-Host ("Mengapply {0}/{1} terlebih dahulu..." -f $svc.Name, $namespaceManifest.Name) -ForegroundColor DarkCyan
+            kubectl apply -f $namespaceManifest.FullName
+        }
+
+        $yamlFiles = Get-ChildItem -Path $k8sDir -Recurse -Filter '*.yaml' -File | Sort-Object FullName
+        if (-not $yamlFiles) {
+            Write-Host ("Tidak menemukan file YAML di {0}" -f $k8sDir) -ForegroundColor Yellow
+        }
+
+        foreach ($file in $yamlFiles) {
+            if ($namespaceManifest -and ($file.FullName -eq $namespaceManifest.FullName)) { continue }
+            Write-Host ("Mengapply {0}/{1}..." -f $svc.Name, $file.FullName.Substring($k8sDir.Length + 1)) -ForegroundColor DarkCyan
+            kubectl apply -f $file.FullName
+        }
+    } else {
+        Write-Host ("Folder manifest k8s tidak ditemukan: {0}" -f $k8sDir) -ForegroundColor Yellow
+    }
+}
+
+# Deploy Kibana di akhir setelah memastikan Elasticsearch
+if ($shouldDeployKibanaLater) {
+    Write-Host ''
+    Write-Host '=== Tahap Akhir: Deploy Kibana ===' -ForegroundColor Green
+
+    if (-not $elasticsearchApplied) {
+        Write-Host 'Elasticsearch tidak di-deploy pada tahap infra, skip Kibana.' -ForegroundColor Yellow
+    } else {
+        if (-not $elasticReady) {
+            if ($skipElasticWait) {
+                Write-Host 'Elasticsearch ditandai skip. Kibana tidak akan dideploy pada eksekusi ini.' -ForegroundColor Yellow
+            } else {
+                Write-Host 'Elasticsearch belum Ready. Menunggu tambahan 180s sebelum mencoba deploy Kibana...' -ForegroundColor Yellow
+                try {
+                    kubectl rollout status statefulset/elasticsearch -n elasticsearch --timeout=180s | Out-Null
+                    if ($LASTEXITCODE -eq 0) { $elasticReady = $true }
+                } catch {
+                    Write-Host 'Rollout Elasticsearch masih belum siap setelah penantian tambahan.' -ForegroundColor Yellow
+                }
+
+                if (-not $elasticReady) {
+                    $elapsed = 0
+                    while ($elapsed -lt 180 -and -not $elasticReady) {
+                        try {
+                            $podsJson = kubectl get pods -n elasticsearch -l app=elasticsearch -o json 2>$null
+                            if ($LASTEXITCODE -eq 0 -and $podsJson) {
+                                $pods = $podsJson | ConvertFrom-Json
+                                if ($pods -and $pods.items -and $pods.items.Count -gt 0) {
+                                    $allReady = $true
+                                    foreach ($pod in $pods.items) {
+                                        $readyCond = $pod.status.conditions | Where-Object { $_.type -eq 'Ready' }
+                                        if (-not ($readyCond -and $readyCond.status -eq 'True')) { $allReady = $false; break }
+                                    }
+                                    if ($allReady) { $elasticReady = $true; break }
+                                }
+                            }
+                        } catch {
+                            # abaikan error polling
+                        }
+                        Start-Sleep -Seconds 5
+                        $elapsed += 5
+                    }
+                }
+            }
+        }
+
+        if ($elasticReady) {
             Write-Host 'Menyiapkan secret Kibana encryption-key...' -ForegroundColor Cyan
-            $kibanaSecretFile = Join-Path $kibanaFolder 'encryption-secret.yaml'
+            $kibanaSecretFile = Join-Path $kibanaFolderPath 'encryption-secret.yaml'
             $secretExists = kubectl get secret kibana-encryption-key -n kibana --ignore-not-found -o name 2>$null
             if (-not $secretExists) {
                 if (Test-Path $kibanaSecretFile) {
-                    try { kubectl apply -f $kibanaSecretFile -n kibana | Out-Null } catch { Write-Host 'Gagal apply encryption-secret.yaml, akan generate otomatis.' -ForegroundColor Yellow }
+                    try { kubectl apply -f $kibanaSecretFile -n kibana | Out-Null } catch { Write-Host 'Gagal apply encryption-secret.yaml, generate otomatis.' -ForegroundColor Yellow }
                 }
                 $secretExists = kubectl get secret kibana-encryption-key -n kibana --ignore-not-found -o name 2>$null
                 if (-not $secretExists) {
@@ -415,83 +633,107 @@ if (Test-Path $esFolder) {
             }
 
             Write-Host 'Deploying Kibana...' -ForegroundColor Cyan
-            $kibanaDeploy = Join-Path $kibanaFolder 'deployment.yaml'
-            $kibanaService = Join-Path $kibanaFolder 'service.yaml'
-            if (Test-Path $kibanaDeploy) { kubectl apply -f $kibanaDeploy -n kibana }
-            if (Test-Path $kibanaService) { kubectl apply -f $kibanaService -n kibana }
-        } else {
-            Write-Host 'Skipping Kibana karena Elasticsearch belum Ready.' -ForegroundColor Yellow
-        }
-    }
-} else {
-    Write-Host 'Folder elasticsearch/ tidak ditemukan, melewati Elasticsearch & Kibana.' -ForegroundColor Yellow
-}
-
-# Konfirmasi sebelum lanjut deploy service
-Write-Host ''
-Write-Host '=== Infrastruktur selesai. Lanjut deploy service yang dipilih? ===' -ForegroundColor Green
-$lanjut = Read-Host 'Ketik Y untuk lanjut, N untuk batal (Y/N)'
-if ($lanjut -notmatch '^[Yy]$') {
-    Write-Host 'Deployment service dibatalkan.' -ForegroundColor Yellow
-    exit 0
-}
-
-# Deploy Service yang dipilih
-if (-not $selectedIdx -or $selectedIdx.Count -eq 0) {
-    Write-Host 'Tidak ada service dipilih. Hanya infrastruktur yang dijalankan.' -ForegroundColor Yellow
-}
-
-foreach ($idx in $selectedIdx) {
-    if ($idx -ge 0 -and $idx -lt $services.Count) {
-        $svc = $services[$idx]
-        $repoDir = Join-Path $root $svc.RepoPath
-        $k8sDir = Join-Path $PSScriptRoot $svc.K8sPath
-        Write-Host ("=== Deploying {0} ===" -f $svc.Name) -ForegroundColor Cyan
-
-        if (Test-Path $repoDir) {
-            Push-Location $repoDir
-            $dockerfilePath = $svc.Dockerfile
-            if (-not (Test-Path $dockerfilePath)) {
-                Write-Host ("Dockerfile {0} tidak ditemukan di {1}. Lewati build." -f $dockerfilePath, $repoDir) -ForegroundColor Yellow
-            } else {
-                docker build -t "$($svc.Image):$VERSION" -f $dockerfilePath .
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Host "Error building $($svc.Image)." -ForegroundColor Red
-                    Pop-Location
-                    continue
-                }
-                docker tag "$($svc.Image):$VERSION" "$($svc.Image):latest"
+            # Pastikan namespace kibana ada
+            try {
+                kubectl create namespace kibana --dry-run=client -o yaml | kubectl apply -f - | Out-Null
+            } catch {
+                Write-Host ("Warning: gagal memastikan namespace kibana: {0}" -f $_.Exception.Message) -ForegroundColor Yellow
             }
-            Pop-Location
-        } else {
-            Write-Host ("Folder repository tidak ditemukan: {0}" -f $repoDir) -ForegroundColor Yellow
-        }
 
-        if (Test-Path $k8sDir) {
-            $deployYaml = Join-Path $k8sDir 'deployment.yaml'
-            $serviceYaml = Join-Path $k8sDir 'service.yaml'
-            if (Test-Path $deployYaml) { kubectl apply -f $deployYaml } else { Write-Host ("deployment.yaml tidak ditemukan di {0}" -f $k8sDir) -ForegroundColor Yellow }
-            if (Test-Path $serviceYaml) { kubectl apply -f $serviceYaml } else { Write-Host ("service.yaml tidak ditemukan di {0}" -f $k8sDir) -ForegroundColor Yellow }
+            # Jika ada namespace.yaml dalam folder kibana, apply terlebih dahulu
+            $kibanaNamespaceManifest = Get-ChildItem -Path $kibanaFolderPath -Filter 'namespace.yaml' -Recurse -File | Select-Object -First 1
+            if ($kibanaNamespaceManifest) {
+                Write-Host ("Mengapply {0}..." -f $kibanaNamespaceManifest.FullName) -ForegroundColor DarkCyan
+                try { kubectl apply -f $kibanaNamespaceManifest.FullName | Out-Null } catch { Write-Host ("Warning: gagal apply {0}: {1}" -f $kibanaNamespaceManifest.FullName, $_.Exception.Message) -ForegroundColor Yellow }
+            }
+
+            # Apply semua YAML di folder kibana (rekursif). Coba apply dengan -n kibana terlebih dahulu, fallback ke tanpa -n jika gagal.
+            $kibanaYamlFiles = Get-ChildItem -Path $kibanaFolderPath -Recurse -Filter '*.yaml' -File | Sort-Object FullName
+            if (-not $kibanaYamlFiles) {
+                Write-Host 'deployment/service dan file YAML untuk Kibana tidak ditemukan.' -ForegroundColor Yellow
+            } else {
+                foreach ($file in $kibanaYamlFiles) {
+                    if ($kibanaNamespaceManifest -and ($file.FullName -eq $kibanaNamespaceManifest.FullName)) { continue }
+                    Write-Host ("Mengapply kibana/{0}..." -f $file.FullName.Substring($kibanaFolderPath.Length + 1)) -ForegroundColor DarkCyan
+                    try {
+                        kubectl apply -f $file.FullName -n kibana | Out-Null
+                    } catch {
+                        # Fallback: apply tanpa override namespace (file mungkin sudah memiliki namespace)
+                        try {
+                            kubectl apply -f $file.FullName | Out-Null
+                        } catch {
+                            Write-Host ("Warning: gagal apply {0}: {1}" -f $file.FullName, $_.Exception.Message) -ForegroundColor Yellow
+                        }
+                    }
+                }
+            }
         } else {
-            Write-Host ("Folder manifest k8s tidak ditemukan: {0}" -f $k8sDir) -ForegroundColor Yellow
+            if ($skipElasticWait) {
+                Write-Host 'Kibana dilewati karena Elasticsearch ditandai skip pada sesi ini.' -ForegroundColor Yellow
+            } else {
+                Write-Host 'Elasticsearch tetap belum Ready. Kibana tidak akan dideploy pada eksekusi ini.' -ForegroundColor Yellow
+            }
         }
-    } else {
-        Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
     }
 }
-
-Write-Host '=== Deployment Selesai ===' -ForegroundColor Green
 
 # Jalankan task scheduler dengan hak admin jika ada
 $taskScript = Join-Path $PSScriptRoot 'update\suma-webhook-task-scheduler.ps1'
+function Invoke-ProcessElevated {
+    param(
+        [Parameter(Mandatory=$true)][string]$ScriptPath,
+        [int]$MaxRetries = 3
+    )
+
+    $attempt = 0
+    while ($attempt -lt $MaxRetries) {
+        $attempt++
+        Write-Host ("Mencoba menjalankan (elevated) {0} (percobaan {1}/{2})..." -f $ScriptPath, $attempt, $MaxRetries) -ForegroundColor Cyan
+        try {
+            Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptPath`"" -Verb RunAs -Wait -WindowStyle Hidden
+            # If Start-Process -Wait returns without exception, assume success
+            Write-Host 'Process elevated selesai.' -ForegroundColor Green
+            return $true
+        } catch {
+            Write-Host 'Permintaan elevasi dibatalkan atau gagal.' -ForegroundColor Yellow
+            if ($attempt -lt $MaxRetries) {
+                $resp = Read-Host 'UAC dibatalkan atau gagal. Coba ulang meminta hak Administrator? (Y/N)'
+                if ($resp.ToUpperInvariant() -ne 'Y') { break }
+                continue
+            }
+        }
+    }
+
+    return $false
+}
+
 if (Test-Path $taskScript) {
-    Write-Host 'Menjalankan suma-webhook-task-scheduler.ps1 dengan hak admin...' -ForegroundColor Cyan
-    Start-Process powershell -ArgumentList "-File `"$taskScript`"" -Verb RunAs
+    # First try to run elevated, with a couple of retries if the user cancels UAC
+    $ok = Invoke-ProcessElevated -ScriptPath $taskScript -MaxRetries 3
+    if (-not $ok) {
+        Write-Host 'Tidak dapat menjalankan dengan elevasi atau user menolak UAC. Menjalankan tanpa elevasi sebagai fallback...' -ForegroundColor Yellow
+        try {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $taskScript
+        } catch {
+            Write-Host ("Task scheduler gagal dijalankan, script ini harus dijalankan dengan hak Administrator. Error: {0}" -f $_.Exception.Message) -ForegroundColor Red
+        }
+    }
 }
 
 # Jalankan createUserKibanaOnElasticsearch.ps1 jika ada
 $userScript = Join-Path $PSScriptRoot 'update\createUserKibanaOnElasticsearch.ps1'
 if (Test-Path $userScript) {
-    Write-Host 'Menjalankan createUserKibanaOnElasticsearch.ps1 dengan hak admin...' -ForegroundColor Cyan
-    Start-Process powershell -ArgumentList "-File `"$userScript`"" -Verb RunAs
+    Write-Host 'Menjalankan createUserKibanaOnElasticsearch.ps1...' -ForegroundColor Cyan
+    try {
+        # Run in-process so it inherits the current user's environment (kubeconfig, PATH, etc.)
+        & $userScript
+    } catch {
+        Write-Host ("Gagal menjalankan {0}: {1}" -f $userScript, $_.Exception.Message) -ForegroundColor Red
+        Write-Host 'Jika Anda memerlukan elevasi (UAC), jalankan script ini manual sebagai Administrator.' -ForegroundColor Yellow
+    }
+} else {
+    Write-Host 'Script createUserKibanaOnElasticsearch.ps1 tidak ditemukan.' -ForegroundColor Yellow
 }
+
+Write-Host ''
+Write-Host '=== Deployment Selesai ===' -ForegroundColor Green
