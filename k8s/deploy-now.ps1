@@ -89,34 +89,102 @@ $selectedIdx = @()
 $selectedNames = [System.Collections.Generic.HashSet[string]]::new()
 # HashSet untuk menandai folder k8s service yang dipilih (dipakai saat apply resource infra opsional)
 $selectedK8sPaths = [System.Collections.Generic.HashSet[string]]::new()
-if ($availableServices.Count -gt 0) {
+$deleteServices = @()
+$deleteMode = $false
+
+if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
     Write-Host '=== Pilih Service yang akan dideploy ===' -ForegroundColor Cyan
     for ($i=0; $i -lt $availableServices.Count; $i++) {
         Write-Host ("[$i] {0}" -f $availableServices[$i].Name) -ForegroundColor Yellow
     }
     Write-Host '[I] Deploy Infrastruktur saja (tanpa service apapun)' -ForegroundColor Yellow
-    $selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3) atau ketik I untuk Infrastruktur saja'
+    if ($skippedServices.Count -gt 0) {
+        Write-Host '[D] Delete service yang sudah ter-deploy' -ForegroundColor Yellow
+    }
+    $selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3), I untuk Infrastruktur saja, atau D untuk Delete'
     if ($selected.Trim().ToUpperInvariant() -eq 'I') {
         $deployInfraOnly = $true
         $selectedIdx = @()
+    } elseif ($selected.Trim().ToUpperInvariant() -eq 'D' -and $skippedServices.Count -gt 0) {
+        $deleteMode = $true
+        # Tampilkan menu delete
+        Write-Host '=== Pilih Service yang akan dihapus ===' -ForegroundColor Cyan
+        for ($i=0; $i -lt $skippedServices.Count; $i++) {
+            Write-Host ("[$i] {0} (namespace: {1})" -f $skippedServices[$i].Name, $skippedServices[$i].Namespace) -ForegroundColor Yellow
+        }
+        $deleteSelected = Read-Host 'Masukkan nomor service yang ingin dihapus (pisahkan dengan koma, contoh: 0,2,3)'
+        $deleteIdx = $deleteSelected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
+        foreach ($idx in $deleteIdx) {
+            if ($idx -ge 0 -and $idx -lt $skippedServices.Count) {
+                $svcObj = $skippedServices[$idx]
+                if (-not $deleteServices.Contains($svcObj)) {
+                    $deleteServices += $svcObj
+                } else {
+                    Write-Host ("Duplikasi pilihan diabaikan: {0}" -f $svcObj.Name) -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
+            }
+        }
+        # Set deployInfraOnly to true after delete, or ask to continue
+        $deployInfraOnly = $true
     } else {
         $selectedIdx = $selected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
     }
-    foreach ($idx in $selectedIdx) {
-        if ($idx -ge 0 -and $idx -lt $availableServices.Count) {
-            $svcObj = $availableServices[$idx]
-            if ($selectedNames.Add($svcObj.Name)) {
-                $selectedServices += $svcObj
-                $null = $selectedK8sPaths.Add($svcObj.K8sPath.ToLower())
+    if (-not $deleteMode) {
+        foreach ($idx in $selectedIdx) {
+            if ($idx -ge 0 -and $idx -lt $availableServices.Count) {
+                $svcObj = $availableServices[$idx]
+                if ($selectedNames.Add($svcObj.Name)) {
+                    $selectedServices += $svcObj
+                    $null = $selectedK8sPaths.Add($svcObj.K8sPath.ToLower())
+                } else {
+                    Write-Host ("Duplikasi pilihan diabaikan: {0}" -f $svcObj.Name) -ForegroundColor Yellow
+                }
             } else {
-                Write-Host ("Duplikasi pilihan diabaikan: {0}" -f $svcObj.Name) -ForegroundColor Yellow
+                Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
             }
-        } else {
-            Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
         }
     }
 } else {
     Write-Host 'Semua service sudah terdeploy. Lewati tahap pemilihan service.' -ForegroundColor Yellow
+}
+
+# Delete selected services if any
+if ($deleteServices.Count -gt 0) {
+    Write-Host '=== Deleting Selected Services ===' -ForegroundColor Red
+    Write-Host 'Service yang akan dihapus:' -ForegroundColor Yellow
+    foreach ($svc in $deleteServices) {
+        Write-Host (" - {0} (namespace: {1})" -f $svc.Name, $svc.Namespace) -ForegroundColor Yellow
+    }
+    $confirmDelete = Read-Host 'Apakah Anda yakin ingin menghapus service ini? (Y/N)'
+    if ($confirmDelete.Trim().ToUpperInvariant() -eq 'Y') {
+        foreach ($svc in $deleteServices) {
+            $k8sDir = Join-Path $PSScriptRoot $svc.K8sPath
+            Write-Host ("Deleting {0}..." -f $svc.Name) -ForegroundColor Yellow
+            if (Test-Path $k8sDir) {
+                $yamlFiles = Get-ChildItem -Path $k8sDir -Recurse -Filter '*.yaml' -File | Where-Object { $_.Name -ne 'namespace.yaml' }
+                if ($yamlFiles) {
+                    foreach ($file in $yamlFiles) {
+                        Write-Host ("  Deleting {0}..." -f $file.FullName.Substring($PSScriptRoot.Length + 1)) -ForegroundColor DarkYellow
+                        try { kubectl delete -f $file.FullName --ignore-not-found } catch { Write-Host ("    Warning: failed to delete {0}: {1}" -f $file.FullName, $_.Exception.Message) -ForegroundColor Yellow }
+                    }
+                } else {
+                    Write-Host ("  No YAML files found in {0}" -f $k8sDir) -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host ("  K8s folder not found: {0}" -f $k8sDir) -ForegroundColor Yellow
+            }
+        }
+        Write-Host 'Deletion completed.' -ForegroundColor Green
+        $continueAfterDelete = Read-Host 'Apakah Anda ingin melanjutkan deploy infrastruktur? (Y/N)'
+        if ($continueAfterDelete.Trim().ToUpperInvariant() -ne 'Y') {
+            Write-Host 'Deployment dibatalkan setelah delete.' -ForegroundColor Yellow
+            exit 0
+        }
+    } else {
+        Write-Host 'Deletion dibatalkan.' -ForegroundColor Yellow
+    }
 }
 
 # Deploy Infrastruktur (selalu otomatis)
@@ -161,6 +229,13 @@ if (Test-Path $vendorsDir) {
         try { kubectl apply -f $certManagerFile } catch { Write-Host ('Warning: gagal apply cert-manager.yaml ({0})' -f $_.Exception.Message) -ForegroundColor Yellow }
     }
 
+        # Apply ClusterIssuer selfsigned untuk cert-manager
+        $clusterIssuerFile = Join-Path $PSScriptRoot 'certs\clusterissuer-selfsigned.yaml'
+        if (Test-Path $clusterIssuerFile) {
+            Write-Host 'Mengapply certs/clusterissuer-selfsigned.yaml untuk ClusterIssuer selfsigned...' -ForegroundColor Cyan
+            try { kubectl apply -f $clusterIssuerFile } catch { Write-Host ('Warning: gagal apply clusterissuer-selfsigned.yaml ({0})' -f $_.Exception.Message) -ForegroundColor Yellow }
+        }
+
     $metricsServerFile = Join-Path $vendorsDir 'metrics-server.yaml'
     if (Test-Path $metricsServerFile) {
         Write-Host 'Mengapply metrics-server.yaml dari vendors/...' -ForegroundColor Cyan
@@ -185,6 +260,30 @@ if (Test-Path $vendorsDir) {
         }
         if ($cmReady) { Write-Host 'cert-manager webhook siap.' -ForegroundColor Green } else { Write-Host 'WARNING: cert-manager webhook belum siap setelah 120s.' -ForegroundColor Yellow }
     }
+
+        # Apply Certificate untuk api.suma-honda.id (apply semua file di certs/ jika ada)
+        $certsDir = Join-Path $PSScriptRoot 'certs'
+        if (Test-Path $certsDir) {
+            Write-Host 'Mengapply semua manifests di certs/ (ClusterIssuer/Certificate)...' -ForegroundColor Cyan
+            try { kubectl apply -f $certsDir --recursive | Out-Null } catch { Write-Host ('Warning: gagal apply certs/: {0}' -f $_.Exception.Message) -ForegroundColor Yellow }
+
+            # Tunggu Certificate yang relevan (jika ada) menjadi Ready sebelum melanjutkan copy secret
+            $certName = 'api-suma-honda-id-cert'
+            try {
+                Write-Host ("Menunggu Certificate {0} menjadi Ready (timeout 120s)..." -f $certName) -ForegroundColor Yellow
+                kubectl wait --for=condition=Ready certificate/$certName -n cert-manager --timeout=120s | Out-Null
+                Write-Host ("Certificate {0} Ready." -f $certName) -ForegroundColor Green
+            } catch {
+                Write-Host ("WARNING: Certificate {0} tidak Ready atau tidak ditemukan setelah timeout." -f $certName) -ForegroundColor Yellow
+            }
+        } else {
+            # fallback: try apply single file if certs dir not present
+            $apiCertFile = Join-Path $PSScriptRoot 'certs\api-public-cert.yaml'
+            if (Test-Path $apiCertFile) {
+                Write-Host 'Mengapply certs/api-public-cert.yaml untuk TLS api.suma-honda.id...' -ForegroundColor Cyan
+                try { kubectl apply -f $apiCertFile } catch { Write-Host ('Warning: gagal apply api-public-cert.yaml ({0})' -f $_.Exception.Message) -ForegroundColor Yellow }
+            }
+        }
 
     Write-Host 'Menginstall Prometheus Operator CRDs...' -ForegroundColor Cyan
     $crdUrls = @(
@@ -354,33 +453,66 @@ if (Test-Path $sslRoot) {
 }
 
 # 8. Copy cert-manager secrets jika diperlukan
-$certManagerSecrets = @{
-    'api-public-suma-honda-test-tls' = @('suma-ecommerce','suma-office','suma-office-general','suma-android','suma-pmo','suma-chat','suma-webhook','elasticsearch')
-}
+# Include both the test name and the actual certificate secret created by Certificate
+if (-not $deployInfraOnly) {
+    $certManagerSecrets = @{
+        'api-public-suma-honda-test-tls' = @('suma-ecommerce','suma-office','suma-office-general','suma-android','suma-pmo','suma-chat','suma-webhook','elasticsearch');
+        'api-suma-honda-id-tls' = @('suma-ecommerce','suma-office','suma-office-general','suma-android','suma-pmo','suma-chat','suma-webhook','elasticsearch')
+    }
 
-foreach ($secretName in $certManagerSecrets.Keys) {
-    $sourceSecret = kubectl get secret $secretName -n cert-manager --ignore-not-found 2>$null
-    if ($sourceSecret) {
-        foreach ($targetNs in $certManagerSecrets[$secretName]) {
-            $nsExists = kubectl get namespace $targetNs --ignore-not-found 2>$null
-            if ($nsExists) {
-                Write-Host ("Menyalin secret {0} ke namespace {1}" -f $secretName, $targetNs) -ForegroundColor Cyan
-                try {
-                    $secretData = kubectl get secret $secretName -n cert-manager -o json | ConvertFrom-Json
-                    $secretData.metadata.namespace = $targetNs
-                    $secretData.metadata.PSObject.Properties.Remove('resourceVersion')
-                    $secretData.metadata.PSObject.Properties.Remove('uid')
-                    $secretData.metadata.PSObject.Properties.Remove('creationTimestamp')
-                    $secretData | ConvertTo-Json -Depth 10 | kubectl apply -f - | Out-Null
-                } catch {
-                    Write-Host ('Warning: gagal menyalin secret ke {0}: {1}' -f $targetNs, $_.Exception.Message) -ForegroundColor Yellow
+    foreach ($secretName in $certManagerSecrets.Keys) {
+        # check existence robustly by trying to get json; capture exit status
+        try {
+            $srcJson = kubectl get secret $secretName -n cert-manager -o json 2>$null
+        } catch {
+            $srcJson = $null
+        }
+
+        if ($srcJson -and $srcJson.Trim()) {
+            # Determine target namespaces: if user selected services, map selectedK8sPaths -> namespaces; otherwise use full list
+            if ($selectedK8sPaths -and $selectedK8sPaths.Count -gt 0) {
+                $targetNamespaces = @()
+                foreach ($p in $selectedK8sPaths) {
+                    # assume folder name equals namespace (k8s path may be same as namespace)
+                    $ns = $p
+                    $targetNamespaces += $ns
+                }
+                # ensure we don't duplicate and keep only those that are in the original mapping (safety)
+                $targetNamespaces = $targetNamespaces | Select-Object -Unique | Where-Object { $certManagerSecrets[$secretName] -contains $_ }
+            } else {
+                $targetNamespaces = $certManagerSecrets[$secretName]
+            }
+
+            foreach ($targetNs in $targetNamespaces) {
+                $nsExists = kubectl get namespace $targetNs --ignore-not-found 2>$null
+                if ($nsExists) {
+                    Write-Host ("Menyalin secret {0} ke namespace {1}" -f $secretName, $targetNs) -ForegroundColor Cyan
+                    try {
+                        $secretData = $srcJson | ConvertFrom-Json
+                        $secretData.metadata.namespace = $targetNs
+                        $secretData.metadata.PSObject.Properties.Remove('resourceVersion')
+                        $secretData.metadata.PSObject.Properties.Remove('uid')
+                        $secretData.metadata.PSObject.Properties.Remove('creationTimestamp')
+                        $secretData | ConvertTo-Json -Depth 10 | kubectl apply -f - | Out-Null
+
+                        # verify copy
+                        Start-Sleep -Seconds 1
+                        $check = kubectl get secret $secretName -n $targetNs --ignore-not-found -o name 2>$null
+                        if ($check) { Write-Host ("    -> copied {0} to {1} ✅" -f $secretName, $targetNs) -ForegroundColor Green } else { Write-Host ("    -> copy verification failed for {0} in {1}" -f $secretName, $targetNs) -ForegroundColor Yellow }
+                    } catch {
+                        Write-Host ('Warning: gagal menyalin secret ke {0}: {1}' -f $targetNs, $_.Exception.Message) -ForegroundColor Yellow
+                    }
+                } else {
+                    Write-Host ("  -> namespace {0} tidak ditemukan; skip copy" -f $targetNs) -ForegroundColor Yellow
                 }
             }
+        } else {
+            Write-Host ("Secret {0} tidak ditemukan di cert-manager; akan di-skip." -f $secretName) -ForegroundColor Yellow
         }
-    } else {
-        Write-Host ("Secret {0} tidak ditemukan di cert-manager." -f $secretName) -ForegroundColor Yellow
     }
 }
+
+# (pre-apply service/endpoints moved later to ensure ingress is applied after app readiness)
 
 # 9. ConfigMap dan monitoring stack
 $monitoringConfig = Join-Path $PSScriptRoot 'monitoring\configmap.yaml'
@@ -570,6 +702,118 @@ foreach ($svc in $selectedServices) {
 }
 
 # Deploy Kibana di akhir setelah memastikan Elasticsearch
+Write-Host 'Waiting for application pods/services to become Ready before applying Ingress resources...' -ForegroundColor Yellow
+
+# Build the namespaces to wait for. Always include infra namespaces and any selected service namespaces.
+$commonInfraNamespaces = @('kibana','elasticsearch','monitoring')
+$svcSelectedNamespaces = @()
+if ($selectedK8sPaths -and $selectedK8sPaths.Count -gt 0) {
+    # selectedK8sPaths contains k8s folder names (lowercased). Use them as namespaces.
+    $svcSelectedNamespaces = $selectedK8sPaths | ForEach-Object { $_ }
+}
+
+$appNamespaces = $commonInfraNamespaces + $svcSelectedNamespaces | Select-Object -Unique
+foreach ($ns in $appNamespaces) {
+    $nsExists = kubectl get namespace $ns --ignore-not-found -o name 2>$null
+    if (-not $nsExists) { continue }
+    Write-Host ("- Waiting for Ready pods in namespace: {0} (timeout 120s)" -f $ns) -ForegroundColor Cyan
+    try {
+        kubectl wait --for=condition=Ready pods -n $ns --all --timeout=120s >$null 2>&1
+        if ($LASTEXITCODE -eq 0) { Write-Host ("  Pods in {0} are Ready." -f $ns) -ForegroundColor Green } else { Write-Host ("  Timeout waiting pods ready in {0} - continuing." -f $ns) -ForegroundColor Yellow }
+    } catch {
+        Write-Host ("  Warning: error waiting pods in {0}: {1}" -f $ns, $_.Exception.Message) -ForegroundColor Yellow
+    }
+}
+
+# Determine whether to apply service/ingress manifests. If no services selected and user chose infra-only, skip.
+if (-not $selectedK8sPaths -or $selectedK8sPaths.Count -eq 0) {
+    Write-Host 'No services selected (infrastructure-only). Skipping Service/Ingress apply.' -ForegroundColor Yellow
+} else {
+    Write-Host 'Applying service/endpoints and ingress manifests for selected services only...' -ForegroundColor Yellow
+
+    # For each selected k8s path, apply namespace, service/endpoints and ingress inside that folder
+    foreach ($k in $selectedK8sPaths) {
+        $kPath = Join-Path $PSScriptRoot $k
+        if (-not (Test-Path $kPath)) { Write-Host ("  -> selected path not found: {0}, skipping" -f $kPath) -ForegroundColor Yellow; continue }
+
+        # Apply namespace manifests first (if any)
+        $nsFiles = Get-ChildItem -Path $kPath -Recurse -Include 'namespace.yaml' -File -ErrorAction SilentlyContinue
+        if ($nsFiles) {
+            foreach ($n in $nsFiles) {
+                $reln = $n.FullName.Substring($PSScriptRoot.Length).TrimStart('\','/')
+                Write-Host (("- Applying namespace manifest: {0}" -f $reln)) -ForegroundColor Cyan
+                try { kubectl apply -f $n.FullName } catch { Write-Host (("  Warning: failed to apply namespace {0}: {1}" -f $reln, $_.Exception.Message)) -ForegroundColor Yellow }
+            }
+        }
+
+        # Apply service/endpoints manifests under this service folder
+        $svcFiles = Get-ChildItem -Path $kPath -Recurse -Include 'service.yaml','services.yaml','endpoints.yaml' -File -ErrorAction SilentlyContinue
+        if ($svcFiles -and $svcFiles.Count -gt 0) {
+            foreach ($s in $svcFiles) {
+                $rel = $s.FullName.Substring($PSScriptRoot.Length).TrimStart('\','/')
+                # try to detect namespace
+                $text = Get-Content -Path $s.FullName -Raw -ErrorAction SilentlyContinue
+                $m = $null
+                if ($text) { $m = [regex]::Match($text, 'metadata:\s*?[\r\n]+(?:\s+[^\r\n]+[\r\n]+)*?\s+namespace:\s*(\S+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase) }
+                if ($m -and $m.Success) { $ns = $m.Groups[1].Value.Trim() } else { $ns = Split-Path -Path $k -Leaf }
+
+                if ($ns) {
+                    Write-Host (("  -> Ensuring namespace exists for {0}: {1}" -f $rel, $ns)) -ForegroundColor Cyan
+                    try { kubectl create namespace $ns --dry-run=client -o yaml | kubectl apply -f - } catch { Write-Host (("  Warning: could not ensure namespace {0}: {1}" -f $ns, $_.Exception.Message)) -ForegroundColor Yellow }
+                }
+
+                Write-Host (("- Applying service/endpoints manifest: {0}" -f $rel)) -ForegroundColor Cyan
+                try { kubectl apply -f $s.FullName } catch { Write-Host (("  Warning: failed to apply {0}: {1}" -f $rel, $_.Exception.Message)) -ForegroundColor Yellow }
+            }
+        } else {
+            Write-Host ("  -> No service/endpoints manifests found in {0}." -f $k) -ForegroundColor Cyan
+        }
+
+        # Small wait to allow the controller to observe endpoints
+        Start-Sleep -Seconds 2
+
+        # Apply ingress manifests within this service folder
+        $ingressFiles = Get-ChildItem -Path $kPath -Recurse -Include 'ingress.yaml' -File -ErrorAction SilentlyContinue
+        if ($ingressFiles -and $ingressFiles.Count -gt 0) {
+            foreach ($file in $ingressFiles) {
+                $rel = $file.FullName.Substring($PSScriptRoot.Length).TrimStart('\','/')
+                Write-Host (("- Preparing to apply ingress: {0}" -f $rel)) -ForegroundColor Cyan
+
+                # discover namespace from the ingress yaml (metadata.namespace) or parent folder
+                $ns = $null
+                try {
+                    $text = Get-Content -Path $file.FullName -Raw -ErrorAction Stop
+                    $m = [regex]::Match($text, 'metadata:\s*[\r\n]+(?:\s+[^\r\n]+[\r\n]+)*?\s+namespace:\s*(\S+)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+                    if ($m.Success) { $ns = $m.Groups[1].Value.Trim() }
+                } catch {
+                    # ignore read errors
+                }
+                if (-not $ns) { try { $ns = Split-Path -Path $k -Leaf } catch { $ns = $null } }
+
+                if ($ns) {
+                    Write-Host (("  -> Ensuring namespace exists: {0}" -f $ns)) -ForegroundColor Cyan
+                    try { kubectl create namespace $ns --dry-run=client -o yaml | kubectl apply -f - } catch { Write-Host (("  Warning: could not ensure namespace {0}: {1}" -f $ns, $_.Exception.Message)) -ForegroundColor Yellow }
+                }
+
+                Write-Host (("- Applying ingress: {0}" -f $rel)) -ForegroundColor Cyan
+                try { kubectl apply -f $file.FullName } catch { Write-Host (("Warning: kubectl apply failed for {0}: {1}" -f $rel, $_.Exception.Message)) -ForegroundColor Yellow }
+            }
+        } else {
+            Write-Host ("  -> No ingress.yaml found in {0}." -f $k) -ForegroundColor Cyan
+        }
+    }
+
+    Write-Host 'Production Deployment Complete' -ForegroundColor Green
+    Write-Host ''
+    Write-Host 'Access your applications:' -ForegroundColor Cyan
+    Write-Host '   Localhost: http://localhost' -ForegroundColor White
+    Write-Host '   Virtual Domain: http://api.suma-honda.id' -ForegroundColor White
+    Write-Host '   Monitoring: https://monitoring.suma-honda.local' -ForegroundColor White
+    Write-Host '   Webhook: https://webhook.suma-honda.local' -ForegroundColor White
+    Write-Host ''
+    Write-Host 'Kubernetes deployment completed successfully!' -ForegroundColor Green
+}
+
 if ($shouldDeployKibanaLater) {
     Write-Host ''
     Write-Host '=== Tahap Akhir: Deploy Kibana ===' -ForegroundColor Green
