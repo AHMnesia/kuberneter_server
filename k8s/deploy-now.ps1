@@ -61,6 +61,7 @@ $services = @(
     @{ Name = 'Suma PMO'; RepoPath = 'suma-pmo'; K8sPath = 'suma-pmo'; Image = 'suma-pmo-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-pmo'; Deployment = 'suma-pmo-api' },
     @{ Name = 'Suma Chat'; RepoPath = 'suma-chat'; K8sPath = 'suma-chat'; Image = 'suma-chat'; Dockerfile = 'dockerfile'; Namespace = 'suma-chat'; Deployment = 'suma-chat' }
 )
+$root = Split-Path $PSScriptRoot -Parent
     $elasticReady = $false
     $elasticsearchApplied = $false
     $shouldDeployKibanaLater = $false
@@ -91,6 +92,8 @@ $selectedNames = [System.Collections.Generic.HashSet[string]]::new()
 $selectedK8sPaths = [System.Collections.Generic.HashSet[string]]::new()
 $deleteServices = @()
 $deleteMode = $false
+$redeployServices = @()
+$redeployMode = $false
 
 if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
     Write-Host '=== Pilih Service yang akan dideploy ===' -ForegroundColor Cyan
@@ -100,8 +103,9 @@ if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
     Write-Host '[I] Deploy Infrastruktur saja (tanpa service apapun)' -ForegroundColor Yellow
     if ($skippedServices.Count -gt 0) {
         Write-Host '[D] Delete service yang sudah ter-deploy' -ForegroundColor Yellow
+        Write-Host '[R] Redeploy service yang sudah ter-deploy' -ForegroundColor Yellow
     }
-    $selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3), I untuk Infrastruktur saja, atau D untuk Delete'
+    $selected = Read-Host 'Masukkan nomor service yang ingin dideploy (pisahkan dengan koma, contoh: 0,2,3), I untuk Infrastruktur saja, atau D/R untuk Delete/Redeploy'
     if ($selected.Trim().ToUpperInvariant() -eq 'I') {
         $deployInfraOnly = $true
         $selectedIdx = @()
@@ -128,10 +132,32 @@ if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
         }
         # Set deployInfraOnly to true after delete, or ask to continue
         $deployInfraOnly = $true
+    } elseif ($selected.Trim().ToUpperInvariant() -eq 'R' -and $skippedServices.Count -gt 0) {
+        $redeployMode = $true
+        Write-Host '=== Pilih Service yang akan diredeploy ===' -ForegroundColor Cyan
+        for ($i=0; $i -lt $skippedServices.Count; $i++) {
+            Write-Host ("[$i] {0} (namespace: {1})" -f $skippedServices[$i].Name, $skippedServices[$i].Namespace) -ForegroundColor Yellow
+        }
+        $redeploySelected = Read-Host 'Masukkan nomor service yang ingin diredeploy (pisahkan dengan koma, contoh: 0,2,3)'
+        $redeployIdx = $redeploySelected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
+        foreach ($idx in $redeployIdx) {
+            if ($idx -ge 0 -and $idx -lt $skippedServices.Count) {
+                $svcObj = $skippedServices[$idx]
+                if (-not $redeployServices.Contains($svcObj)) {
+                    $redeployServices += $svcObj
+                } else {
+                    Write-Host ("Duplikasi pilihan diabaikan: {0}" -f $svcObj.Name) -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
+            }
+        }
+        # Set deployInfraOnly to true after redeploy, or ask to continue
+        $deployInfraOnly = $true
     } else {
         $selectedIdx = $selected -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
     }
-    if (-not $deleteMode) {
+    if (-not $deleteMode -and -not $redeployMode) {
         foreach ($idx in $selectedIdx) {
             if ($idx -ge 0 -and $idx -lt $availableServices.Count) {
                 $svcObj = $availableServices[$idx]
@@ -187,10 +213,147 @@ if ($deleteServices.Count -gt 0) {
     }
 }
 
+# Redeploy selected services if any
+if ($redeployServices.Count -gt 0) {
+    Write-Host '=== Redeploying Selected Services ===' -ForegroundColor Cyan
+    Write-Host 'Service yang akan diredeploy:' -ForegroundColor Yellow
+    foreach ($svc in $redeployServices) {
+        Write-Host (" - {0} (namespace: {1})" -f $svc.Name, $svc.Namespace) -ForegroundColor Yellow
+    }
+    $confirmRedeploy = Read-Host 'Apakah Anda yakin ingin redeploy service ini? (Y/N)'
+    if ($confirmRedeploy.Trim().ToUpperInvariant() -eq 'Y') {
+        foreach ($svc in $redeployServices) {
+            $repoDir = Join-Path $root $svc.RepoPath
+            $k8sDir = Join-Path $PSScriptRoot $svc.K8sPath
+            Write-Host ("=== Redeploying {0} ===" -f $svc.Name) -ForegroundColor Cyan
+
+            if (Test-Path $repoDir) {
+                Push-Location $repoDir
+                $dockerfilePath = $svc.Dockerfile
+                if (-not (Test-Path $dockerfilePath)) {
+                    Write-Host ("Dockerfile {0} tidak ditemukan di {1}. Lewati redeploy." -f $dockerfilePath, $repoDir) -ForegroundColor Yellow
+                    Pop-Location
+                    continue
+                }
+
+                # Cek image yang sudah ada
+                try {
+                    $existingImages = docker images --format "{{.Repository}}:{{.Tag}}" | Where-Object { $_ -like "$($svc.Image):*" }
+                    $availableVersions = $existingImages | ForEach-Object { ($_ -split ':')[1] } | Where-Object { $_ -ne 'latest' } | Sort-Object -Descending
+                } catch {
+                    Write-Host ("Warning: Gagal cek existing image untuk {0}: {1}" -f $svc.Image, $_.Exception.Message) -ForegroundColor Yellow
+                    $availableVersions = @()
+                }
+
+                $useExisting = $false
+                $selectedVersion = $null
+                if ($availableVersions.Count -gt 0) {
+                    Write-Host ("Available images for {0}:" -f $svc.Image) -ForegroundColor Green
+                    foreach ($ver in $availableVersions) {
+                        Write-Host ("  - {0}" -f $ver) -ForegroundColor Green
+                    }
+                    $useExistingInput = Read-Host "Apakah Anda ingin menggunakan salah satu image versi spesifik yang sudah ada? (Y untuk ya, lalu pilih versi; N untuk build baru; atau langsung masukkan versi)"
+                    if ($availableVersions -contains $useExistingInput.Trim()) {
+                        # User entered a version directly
+                        $useExisting = $true
+                        $VERSION = $useExistingInput.Trim()
+                        Write-Host ("Menggunakan image {0}:{1}" -f $svc.Image, $VERSION) -ForegroundColor Green
+                    } elseif ($useExistingInput.Trim().ToUpperInvariant() -eq 'Y') {
+                        $selectedVersion = Read-Host "Masukkan versi yang ingin digunakan (hanya versi spesifik, contoh: v1.0.1)"
+                        if ($selectedVersion -and $availableVersions -contains $selectedVersion) {
+                            $useExisting = $true
+                            $VERSION = $selectedVersion
+                            Write-Host ("Menggunakan image {0}:{1}" -f $svc.Image, $VERSION) -ForegroundColor Green
+                        } else {
+                            Write-Host "Versi tidak valid atau tidak tersedia, akan build baru." -ForegroundColor Yellow
+                        }
+                    } elseif ($useExistingInput.Trim().ToUpperInvariant() -eq 'N') {
+                        # Will build new
+                    } else {
+                        Write-Host "Input tidak valid, akan build baru." -ForegroundColor Yellow
+                    }
+                } else {
+                    Write-Host ("Tidak ada image yang tersedia untuk {0}, akan build baru." -f $svc.Image) -ForegroundColor Yellow
+                }
+
+                if (-not $useExisting) {
+                    # Tanya versi baru
+                    $newVersion = Read-Host "Masukkan versi baru untuk redeploy (contoh: v1.0.1, atau tekan Enter untuk increment otomatis dari $VERSION)"
+                    if (-not $newVersion.Trim()) {
+                        # Increment otomatis (asumsi format vX.Y.Z)
+                        $versionParts = $VERSION -replace '^v', '' -split '\.'
+                        if ($versionParts.Count -eq 3) {
+                            $patch = [int]$versionParts[2] + 1
+                            $newVersion = "v$($versionParts[0]).$($versionParts[1]).$patch"
+                        } else {
+                            $newVersion = "$VERSION-updated"  # Fallback
+                        }
+                    }
+                    Write-Host ("Build ulang image ke versi {0}..." -f $newVersion) -ForegroundColor Cyan
+                    docker build -t "$($svc.Image):$newVersion" -f $dockerfilePath .
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "Error building $($svc.Image)." -ForegroundColor Red
+                        Pop-Location
+                        continue
+                    }
+                    docker tag "$($svc.Image):$newVersion" "$($svc.Image):latest"
+                    # Update deployment image (opsional, atau biarkan kubectl apply update)
+                } else {
+                    Write-Host "Menggunakan image existing. Lewati build." -ForegroundColor Cyan
+                }
+
+                Pop-Location
+            } else {
+                Write-Host ("Folder repository tidak ditemukan: {0}" -f $repoDir) -ForegroundColor Yellow
+            }
+
+            # Apply k8s manifests untuk update (deployment akan restart otomatis jika image berubah)
+            if (Test-Path $k8sDir) {
+                $yamlFiles = Get-ChildItem -Path $k8sDir -Recurse -Filter '*.yaml' -File | Where-Object { $_.Name -ne 'namespace.yaml' }  # Skip namespace, sudah ada
+                if ($yamlFiles) {
+                    foreach ($file in $yamlFiles) {
+                        Write-Host ("Mengapply {0} untuk update..." -f $file.FullName.Substring($k8sDir.Length + 1)) -ForegroundColor DarkCyan
+                        try { kubectl apply -f $file.FullName } catch { Write-Host ("Warning: failed to apply {0}: {1}" -f $file.FullName, $_.Exception.Message) -ForegroundColor Yellow }
+                    }
+                } else {
+                    Write-Host ("No YAML files found in {0}" -f $k8sDir) -ForegroundColor Yellow
+                }
+
+                # Update deployment image to the selected version
+                Write-Host ("Updating deployment {0} to image {1}:{2}..." -f $svc.Deployment, $svc.Image, $VERSION) -ForegroundColor Cyan
+                try {
+                    $containerName = kubectl get deployment $($svc.Deployment) -n $($svc.Namespace) -o jsonpath='{.spec.template.spec.containers[0].name}' 2>$null
+                    if ($LASTEXITCODE -eq 0 -and $containerName) {
+                        kubectl set image deployment/$($svc.Deployment) $containerName=$($svc.Image):$VERSION -n $($svc.Namespace)
+                        if ($LASTEXITCODE -ne 0) {
+                            Write-Host "Warning: failed to set image for deployment $($svc.Deployment)" -ForegroundColor Yellow
+                        }
+                    } else {
+                        Write-Host "Warning: could not get container name for deployment $($svc.Deployment)" -ForegroundColor Yellow
+                    }
+                } catch { Write-Host ("Warning: failed to set image: {0}" -f $_.Exception.Message) -ForegroundColor Yellow }
+
+                # Restart deployment untuk memastikan image update
+                Write-Host ("Restarting deployment {0}..." -f $svc.Deployment) -ForegroundColor Cyan
+                try { kubectl rollout restart deployment/$($svc.Deployment) -n $($svc.Namespace) } catch { Write-Host ("Warning: failed to restart deployment: {0}" -f $_.Exception.Message) -ForegroundColor Yellow }
+            } else {
+                Write-Host ("Folder manifest k8s tidak ditemukan: {0}" -f $k8sDir) -ForegroundColor Yellow
+            }
+        }
+        Write-Host 'Redeploy completed.' -ForegroundColor Green
+        $continueAfterRedeploy = Read-Host 'Apakah Anda ingin melanjutkan deploy infrastruktur? (Y/N)'
+        if ($continueAfterRedeploy.Trim().ToUpperInvariant() -ne 'Y') {
+            Write-Host 'Deployment dibatalkan setelah redeploy.' -ForegroundColor Yellow
+            exit 0
+        }
+    } else {
+        Write-Host 'Redeploy dibatalkan.' -ForegroundColor Yellow
+    }
+}
+
 # Deploy Infrastruktur (selalu otomatis)
 Write-Host '=== Deploy Infrastruktur (Otomatis) ===' -ForegroundColor Green
 
-$root = Split-Path $PSScriptRoot -Parent
 Set-Location $PSScriptRoot
 
 # 1. Vendor components (cert-manager, ingress-nginx, metrics-server)
@@ -658,13 +821,53 @@ foreach ($svc in $selectedServices) {
         if (-not (Test-Path $dockerfilePath)) {
             Write-Host ("Dockerfile {0} tidak ditemukan di {1}. Lewati build." -f $dockerfilePath, $repoDir) -ForegroundColor Yellow
         } else {
-            docker build -t "$($svc.Image):$VERSION" -f $dockerfilePath .
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "Error building $($svc.Image)." -ForegroundColor Red
-                Pop-Location
-                continue
+            # Cek apakah image sudah ada (lokal atau registry)
+            $imageExists = $false
+            try {
+                $existingImages = docker images --format "{{.Repository}}:{{.Tag}}" | Where-Object { $_ -eq "$($svc.Image):$VERSION" }
+                if ($existingImages) { $imageExists = $true }
+            } catch {
+                Write-Host ("Warning: Gagal cek existing image untuk {0}: {1}" -f $svc.Image, $_.Exception.Message) -ForegroundColor Yellow
             }
-            docker tag "$($svc.Image):$VERSION" "$($svc.Image):latest"
+
+            if ($imageExists) {
+                Write-Host ("Image {0}:{1} sudah ada." -f $svc.Image, $VERSION) -ForegroundColor Green
+                $useExisting = Read-Host "Gunakan image yang sudah ada? (Y untuk ya, N untuk update versi baru)"
+                if ($useExisting.Trim().ToUpperInvariant() -eq 'Y') {
+                    Write-Host "Menggunakan image existing. Lewati build." -ForegroundColor Cyan
+                } else {
+                    # Tanya versi baru
+                    $newVersion = Read-Host "Masukkan versi baru untuk update (contoh: v1.0.1, atau tekan Enter untuk increment otomatis dari $VERSION)"
+                    if (-not $newVersion.Trim()) {
+                        # Increment otomatis (asumsi format vX.Y.Z)
+                        $versionParts = $VERSION -replace '^v', '' -split '\.'
+                        if ($versionParts.Count -eq 3) {
+                            $patch = [int]$versionParts[2] + 1
+                            $newVersion = "v$($versionParts[0]).$($versionParts[1]).$patch"
+                        } else {
+                            $newVersion = "$VERSION-updated"  # Fallback
+                        }
+                    }
+                    Write-Host ("Update image ke versi {0}..." -f $newVersion) -ForegroundColor Cyan
+                    docker build -t "$($svc.Image):$newVersion" -f $dockerfilePath .
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "Error building $($svc.Image)." -ForegroundColor Red
+                        Pop-Location
+                        continue
+                    }
+                    docker tag "$($svc.Image):$newVersion" "$($svc.Image):latest"
+                    # Update $VERSION untuk service ini jika perlu (opsional, tergantung logic Anda)
+                }
+            } else {
+                # Build normal jika image tidak ada
+                docker build -t "$($svc.Image):$VERSION" -f $dockerfilePath .
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "Error building $($svc.Image)." -ForegroundColor Red
+                    Pop-Location
+                    continue
+                }
+                docker tag "$($svc.Image):$VERSION" "$($svc.Image):latest"
+            }
         }
         Pop-Location
     } else {
