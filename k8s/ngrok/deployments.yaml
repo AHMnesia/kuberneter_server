@@ -1,0 +1,99 @@
+# File deployments.yaml untuk Ngrok
+# Menggabungkan semua resource Kubernetes untuk Ngrok dalam satu file multi-dokumen
+# Resource yang disertakan: ConfigMap, Secret, Deployment, Service
+---
+# ConfigMap untuk konfigurasi Ngrok
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ngrok-config
+  namespace: suma-chat
+data:
+  ngrok.yml: |
+    version: "2"
+    region: eu
+    tunnels:
+      suma-chat:
+        addr: suma-chat.suma-chat.svc.cluster.local:80
+        proto: http
+---
+# Secret untuk menyimpan auth token Ngrok
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ngrok-secret
+  namespace: suma-chat
+type: Opaque
+data:
+  # Base64 encoded ngrok auth token
+  # Replace with your actual token: echo -n "your_ngrok_token" | base64
+  NGROK_AUTHTOKEN: Mm84azZudFplYm5pRjlmSTlPc2wxWFFHN0loXzZaak5oN1c4UUY0RTM0YkpHSDdhQQ==
+---
+# Deployment untuk Ngrok
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok
+  namespace: suma-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ngrok
+  template:
+    metadata:
+      labels:
+        app: ngrok
+    spec:
+      containers:
+      - name: ngrok
+        image: ngrok/ngrok:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - ngrok
+        - start
+        - suma-chat
+        - --log=stdout
+        - --log-level=debug
+        env:
+        - name: NGROK_AUTHTOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ngrok-secret
+              key: NGROK_AUTHTOKEN
+        - name: NGROK_REGION
+          value: eu
+        ports:
+        - containerPort: 4040
+          name: web
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        volumeMounts:
+        - name: ngrok-config
+          mountPath: /home/ngrok/.config/ngrok/ngrok.yml
+          subPath: ngrok.yml
+      volumes:
+      - name: ngrok-config
+        configMap:
+          name: ngrok-config
+---
+# Service untuk expose Ngrok web interface
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrok
+  namespace: suma-chat
+spec:
+  selector:
+    app: ngrok
+  ports:
+  - name: web
+    port: 4040
+    targetPort: 4040
+    protocol: TCP
+  type: ClusterIP
