@@ -46,7 +46,6 @@ resources:
   # 4. Service aplikasi (namespace dulu, lalu lainnya)
   - suma-android/namespace.yaml
   - suma-android/certificate.yaml
-  - suma-android/configmap.yaml
   - suma-android/pvc.yaml
   - suma-android/service.yaml
   - suma-android/deployment.yaml
@@ -74,7 +73,6 @@ resources:
 
   - suma-ecommerce/namespace.yaml
   - suma-ecommerce/certificate.yaml
-  - suma-ecommerce/configmap.yaml
   - suma-ecommerce/pvc.yaml
   - suma-ecommerce/service.yaml
   - suma-ecommerce/deployment.yaml
@@ -96,7 +94,6 @@ resources:
 
   - suma-office-general/namespace.yaml
   - suma-office-general/certificate.yaml
-  - suma-office-general/configmap.yaml
   - suma-office-general/pvc.yaml
   - suma-office-general/service.yaml
   - suma-office-general/deployment.yaml
@@ -107,7 +104,6 @@ resources:
 
   - suma-pmo/namespace.yaml
   - suma-pmo/certificate.yaml
-  - suma-pmo/configmap.yaml
   - suma-pmo/pvc.yaml
   - suma-pmo/service.yaml
   - suma-pmo/deployment.yaml
