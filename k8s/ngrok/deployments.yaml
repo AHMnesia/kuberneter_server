@@ -1,21 +1,7 @@
 # File deployments.yaml untuk Ngrok
 # Menggabungkan semua resource Kubernetes untuk Ngrok dalam satu file multi-dokumen
-# Resource yang disertakan: ConfigMap, Secret, Deployment, Service
----
-# ConfigMap untuk konfigurasi Ngrok
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ngrok-config
-  namespace: suma-chat
-data:
-  ngrok.yml: |
-    version: "2"
-    region: eu
-    tunnels:
-      suma-chat:
-        addr: suma-chat.suma-chat.svc.cluster.local:80
-        proto: http
+# Resource yang disertakan: Secret, Deployment, Service
+# Catatan: ConfigMap dipisah ke configmap.yaml untuk menghindari duplikat
 ---
 # Secret untuk menyimpan auth token Ngrok
 apiVersion: v1
