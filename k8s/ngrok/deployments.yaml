@@ -1,19 +1,6 @@
 # File deployments.yaml untuk Ngrok
-# Menggabungkan semua resource Kubernetes untuk Ngrok dalam satu file multi-dokumen
-# Resource yang disertakan: Secret, Deployment, Service
-# Catatan: ConfigMap dipisah ke configmap.yaml untuk menghindari duplikat
----
-# Secret untuk menyimpan auth token Ngrok
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ngrok-secret
-  namespace: suma-chat
-type: Opaque
-data:
-  # Base64 encoded ngrok auth token
-  # Replace with your actual token: echo -n "your_ngrok_token" | base64
-  NGROK_AUTHTOKEN: Mm84azZudFplYm5pRjlmSTlPc2wxWFFHN0loXzZaak5oN1c4UUY0RTM0YkpHSDdhQQ==
+# Resource yang disertakan: Deployment, Service
+# Catatan: ConfigMap dan Secret dipisah ke file terpisah
 ---
 # Deployment untuk Ngrok
 apiVersion: apps/v1
