@@ -15,6 +15,7 @@ resources:
   # 3. Infra pendukung (redis, elasticsearch, kibana, monitoring)
   - redis/namespace.yaml
   - redis/redis-cluster.yaml
+  - elasticsearch/namespace.yaml
   - elasticsearch/ca-cert.yaml
   - elasticsearch/issuer-ca.yaml
   - elasticsearch/issuer-selfsigned.yaml
@@ -25,6 +26,7 @@ resources:
   - elasticsearch/node-cert.yaml
   - elasticsearch/poddisruptionbudget.yaml
   - elasticsearch/ingress.yaml
+  - kibana/namespace.yaml
   - kibana/encryption-secret.yaml
   - kibana/deployment.yaml
   - kibana/service.yaml
