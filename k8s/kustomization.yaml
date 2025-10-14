@@ -1,0 +1,127 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Urutan apply resources untuk menghindari dependency error (namespace, cert-manager, dll. dulu)
+resources:
+  # 1. Vendors (cert-manager, ingress-nginx, metrics-server)
+  - vendors/cert-manager.yaml
+  - vendors/ingress-nginx.yaml
+  - vendors/metrics-server.yaml
+
+  # 2. Certs (issuer dan certificate setelah cert-manager)
+  - certs/clusterissuer-selfsigned.yaml
+  - certs/api-public-cert.yaml
+
+  # 3. Infra pendukung (redis, elasticsearch, kibana, monitoring)
+  - redis/namespace.yaml
+  - redis/redis-cluster.yaml
+  - elasticsearch/ca-cert.yaml
+  - elasticsearch/issuer-ca.yaml
+  - elasticsearch/issuer-selfsigned.yaml
+  - elasticsearch/certificate.yaml
+  - elasticsearch/statefulset.yaml
+  - elasticsearch/service.yaml
+  - elasticsearch/networkpolicy.yaml
+  - elasticsearch/node-cert.yaml
+  - elasticsearch/poddisruptionbudget.yaml
+  - elasticsearch/ingress.yaml
+  - kibana/encryption-secret.yaml
+  - kibana/deployment.yaml
+  - kibana/service.yaml
+  - kibana/networkpolicy.yaml
+  - kibana/poddisruptionbudget.yaml
+  - kibana/ingress.yaml
+  - monitoring/namespace.yaml
+  - monitoring/configmap.yaml
+  - monitoring/rbac.yaml
+  - monitoring/pvc.yaml
+  - monitoring/pdb.yaml
+  - monitoring/deployment.yaml
+  - monitoring/service.yaml
+  - monitoring/networkpolicy.yaml
+  - monitoring/ingress.yaml
+
+  # 4. Service aplikasi (namespace dulu, lalu lainnya)
+  - suma-android/namespace.yaml
+  - suma-android/certificate.yaml
+  - suma-android/configmap.yaml
+  - suma-android/pvc.yaml
+  - suma-android/service.yaml
+  - suma-android/deployment.yaml
+  - suma-android/hpa.yaml
+  - suma-android/networkpolicy.yaml
+  - suma-android/poddisruptionbudget.yaml
+  - suma-android/ingress.yaml
+
+  - suma-chat/namespace.yaml
+  - suma-chat/certificate.yaml
+  - suma-chat/configmap.yaml
+  - suma-chat/redis-deployment.yaml
+  - suma-chat/redis-service.yaml
+  - suma-chat/service.yaml
+  - suma-chat/deployment.yaml
+  - suma-chat/hpa.yaml
+  - suma-chat/networkpolicy.yaml
+  - suma-chat/poddisruptionbudget.yaml
+  - suma-chat/ingress.yaml
+
+  - ngrok/configmap.yaml
+  - ngrok/secret.yaml
+  - ngrok/deployments.yaml
+  - ngrok/service.yaml
+
+  - suma-ecommerce/namespace.yaml
+  - suma-ecommerce/certificate.yaml
+  - suma-ecommerce/configmap.yaml
+  - suma-ecommerce/pvc.yaml
+  - suma-ecommerce/service.yaml
+  - suma-ecommerce/deployment.yaml
+  - suma-ecommerce/hpa.yaml
+  - suma-ecommerce/networkpolicy.yaml
+  - suma-ecommerce/poddisruptionbudget.yaml
+  - suma-ecommerce/ingress.yaml
+
+  - suma-office/namespace.yaml
+  - suma-office/certificate.yaml
+  - suma-office/configmap.yaml
+  - suma-office/pvc.yaml
+  - suma-office/service.yaml
+  - suma-office/deployment.yaml
+  - suma-office/hpa.yaml
+  - suma-office/networkpolicy.yaml
+  - suma-office/poddisruptionbudget.yaml
+  - suma-office/ingress.yaml
+
+  - suma-office-general/namespace.yaml
+  - suma-office-general/certificate.yaml
+  - suma-office-general/configmap.yaml
+  - suma-office-general/pvc.yaml
+  - suma-office-general/service.yaml
+  - suma-office-general/deployment.yaml
+  - suma-office-general/hpa.yaml
+  - suma-office-general/networkpolicy.yaml
+  - suma-office-general/poddisruptionbudget.yaml
+  - suma-office-general/ingress.yaml
+
+  - suma-pmo/namespace.yaml
+  - suma-pmo/certificate.yaml
+  - suma-pmo/configmap.yaml
+  - suma-pmo/pvc.yaml
+  - suma-pmo/service.yaml
+  - suma-pmo/deployment.yaml
+  - suma-pmo/hpa.yaml
+  - suma-pmo/networkpolicy.yaml
+  - suma-pmo/poddisruptionbudget.yaml
+  - suma-pmo/ingress.yaml
+
+  - suma-webhook/namespace.yaml
+  - suma-webhook/certificate.yaml
+  - suma-webhook/endpoints.yaml
+  - suma-webhook/service.yaml
+  - suma-webhook/ingress.yaml
+
+  # 5. Global PDB
+  - app-pdb.yaml
+
+# Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
+# Jika ada file tambahan atau error, edit urutan ini.
