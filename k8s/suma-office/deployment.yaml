@@ -31,6 +31,7 @@ spec:
         ports:
         - containerPort: 8000
         workingDir: /var/www/html
+        command: ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
         # Do not override the image ENTRYPOINT here. The image provides supervisord
         # to manage multiple processes (nginx/php-fpm or php artisan + queue workers).
         # Overriding the command with `php artisan serve` made PID 1 the PHP server
