@@ -49,7 +49,7 @@ resources:
   - suma-android/pvc.yaml
   - suma-android/service.yaml
   # - suma-android/deployment.yaml
-  - suma-android/hpa.yaml
+  # - suma-android/hpa.yaml
   - suma-android/networkpolicy.yaml
   # - suma-android/poddisruptionbudget.yaml
   - suma-android/ingress.yaml
@@ -61,7 +61,7 @@ resources:
   - suma-chat/redis-service.yaml
   - suma-chat/service.yaml
   - suma-chat/deployment.yaml
-  - suma-chat/hpa.yaml
+  # - suma-chat/hpa.yaml
   - suma-chat/networkpolicy.yaml
   # - suma-chat/poddisruptionbudget.yaml
   - suma-chat/ingress.yaml
@@ -76,7 +76,7 @@ resources:
   - suma-ecommerce/pvc.yaml
   - suma-ecommerce/service.yaml
   # - suma-ecommerce/deployment.yaml
-  - suma-ecommerce/hpa.yaml
+  # - suma-ecommerce/hpa.yaml
   - suma-ecommerce/networkpolicy.yaml
   # - suma-ecommerce/poddisruptionbudget.yaml
   - suma-ecommerce/ingress.yaml
@@ -87,7 +87,7 @@ resources:
   - suma-office/pvc.yaml
   - suma-office/service.yaml
   # - suma-office/deployment.yaml
-  - suma-office/hpa.yaml
+  # - suma-office/hpa.yaml
   - suma-office/networkpolicy.yaml
   # - suma-office/poddisruptionbudget.yaml
   - suma-office/ingress.yaml
@@ -98,7 +98,7 @@ resources:
   - suma-office-general/pvc.yaml
   - suma-office-general/service.yaml
   # - suma-office-general/deployment.yaml
-  - suma-office-general/hpa.yaml
+  # - suma-office-general/hpa.yaml
   - suma-office-general/networkpolicy.yaml
   # - suma-office-general/poddisruptionbudget.yaml
   - suma-office-general/ingress.yaml
@@ -108,7 +108,7 @@ resources:
   - suma-pmo/pvc.yaml
   - suma-pmo/service.yaml
   # - suma-pmo/deployment.yaml
-  - suma-pmo/hpa.yaml
+  # - suma-pmo/hpa.yaml
   - suma-pmo/networkpolicy.yaml
   # - suma-pmo/poddisruptionbudget.yaml
   - suma-pmo/ingress.yaml
