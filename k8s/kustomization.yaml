@@ -48,7 +48,7 @@ resources:
   - suma-android/certificate.yaml
   - suma-android/pvc.yaml
   - suma-android/service.yaml
-  - suma-android/deployment.yaml
+  # - suma-android/deployment.yaml
   - suma-android/hpa.yaml
   - suma-android/networkpolicy.yaml
   # - suma-android/poddisruptionbudget.yaml
@@ -75,7 +75,7 @@ resources:
   - suma-ecommerce/certificate.yaml
   - suma-ecommerce/pvc.yaml
   - suma-ecommerce/service.yaml
-  - suma-ecommerce/deployment.yaml
+  # - suma-ecommerce/deployment.yaml
   - suma-ecommerce/hpa.yaml
   - suma-ecommerce/networkpolicy.yaml
   # - suma-ecommerce/poddisruptionbudget.yaml
@@ -86,7 +86,7 @@ resources:
   - suma-office/configmap.yaml
   - suma-office/pvc.yaml
   - suma-office/service.yaml
-  - suma-office/deployment.yaml
+  # - suma-office/deployment.yaml
   - suma-office/hpa.yaml
   - suma-office/networkpolicy.yaml
   # - suma-office/poddisruptionbudget.yaml
@@ -97,7 +97,7 @@ resources:
   - suma-office-general/configmap.yaml
   - suma-office-general/pvc.yaml
   - suma-office-general/service.yaml
-  - suma-office-general/deployment.yaml
+  # - suma-office-general/deployment.yaml
   - suma-office-general/hpa.yaml
   - suma-office-general/networkpolicy.yaml
   # - suma-office-general/poddisruptionbudget.yaml
@@ -107,7 +107,7 @@ resources:
   - suma-pmo/certificate.yaml
   - suma-pmo/pvc.yaml
   - suma-pmo/service.yaml
-  - suma-pmo/deployment.yaml
+  # - suma-pmo/deployment.yaml
   - suma-pmo/hpa.yaml
   - suma-pmo/networkpolicy.yaml
   # - suma-pmo/poddisruptionbudget.yaml
