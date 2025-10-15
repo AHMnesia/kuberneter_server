@@ -94,6 +94,7 @@ resources:
 
   - suma-office-general/namespace.yaml
   - suma-office-general/certificate.yaml
+  - suma-office-general/configmap.yaml
   - suma-office-general/pvc.yaml
   - suma-office-general/service.yaml
   - suma-office-general/deployment.yaml
