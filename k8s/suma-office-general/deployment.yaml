@@ -31,10 +31,8 @@ spec:
         ports:
         - containerPort: 8000
         workingDir: /var/www/html
-        # Do not override the image ENTRYPOINT here. The image provides supervisord
-        # to manage multiple processes (nginx/php-fpm or php artisan + queue workers).
-        # Overriding the command with `php artisan serve` made PID 1 the PHP server
-        # so supervisord was never started. Remove `command` so supervisord runs.
+        command: ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+        # Override to ensure Laravel binds to 0.0.0.0
         # Production mode - tidak ada volume mount
         resources:
           requests:
@@ -55,14 +53,14 @@ spec:
           initialDelaySeconds: 30
           failureThreshold: 30
           periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /login
-            port: 8000
-          initialDelaySeconds: 120
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
+        # readinessProbe:
+        #   httpGet:
+        #     path: /login
+        #     port: 8000
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        #   timeoutSeconds: 30
+        #   failureThreshold: 3
         # readinessProbe:
         #   httpGet:
         #     path: /login
