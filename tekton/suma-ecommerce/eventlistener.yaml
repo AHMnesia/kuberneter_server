@@ -1,0 +1,26 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: suma-ecommerce-release-listener
+spec:
+  serviceAccountName: tekton-triggers-sa
+  triggers:
+    - name: suma-ecommerce-release-trigger
+      interceptors:
+        - ref:
+            name: "github"
+          params:
+            - name: "secretRef"
+              value:
+                secretName: github-secret
+                secretKey: secretToken
+            - name: "eventTypes"
+              value: ["release"]
+        - name: "cel"
+          params:
+            - name: "filter"
+              value: "body.action == 'published' && body.release.target_commitish == 'production' && body.repository.name == 'suma-ecommerce'"
+      bindings:
+        - ref: suma-ecommerce-release-binding
+      template:
+        ref: suma-ecommerce-release-template

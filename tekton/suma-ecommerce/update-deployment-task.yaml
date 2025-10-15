@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: update-deployment
+spec:
+  params:
+    - name: deployment-file
+      type: string
+    - name: image-name
+      type: string
+  workspaces:
+    - name: source
+  steps:
+    - name: update-yaml
+      image: alpine/git:latest
+      script: |
+        cd $(workspaces.source.path)/source
+        sed -i 's|image: .*|image: "$(params.image-name)"|' $(params.deployment-file)
+        git add $(params.deployment-file)
+        git commit -m "Update suma-ecommerce image to $(params.image-name)"
+        git push origin main

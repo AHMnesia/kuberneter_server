@@ -1,0 +1,112 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: suma-ecommerce-pipeline
+spec:
+  params:
+    - name: release-tag
+      type: string
+    - name: repo-name
+      type: string
+      default: "suma-ecommerce"
+    - name: commit-sha
+      type: string
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: checkout-code
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: "https://github.com/AHMnesia/$(params.repo-name).git"
+        - name: revision
+          value: $(params.commit-sha)
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+
+    - name: build-image
+      taskRef:
+        name: kaniko
+      runAfter: [checkout-code]
+      params:
+        - name: IMAGE
+          value: "ahmnesia/$(params.repo-name):$(params.release-tag)"
+        - name: DOCKERFILE
+          value: "./dockerfile"
+        - name: CONTEXT
+          value: "./"
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: update-deployment
+      taskRef:
+        name: update-deployment
+      runAfter: [build-image]
+      params:
+        - name: deployment-file
+          value: "k8s/suma-ecommerce/deployment.yaml"
+        - name: image-name
+          value: "ahmnesia/$(params.repo-name):$(params.release-tag)"
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+spec:
+  params:
+    - name: url
+      type: string
+    - name: revision
+      type: string
+      default: "main"
+  results:
+    - name: commit
+      description: "The commit SHA"
+  workspaces:
+    - name: output
+  steps:
+    - name: clone
+      image: alpine/git:latest
+      script: |
+        git clone $(params.url) $(workspaces.output.path)/source
+        cd $(workspaces.output.path)/source
+        git checkout $(params.revision)
+        echo -n $(git rev-parse HEAD) > $(results.commit.path)
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kaniko
+spec:
+  params:
+    - name: IMAGE
+      type: string
+    - name: DOCKERFILE
+      type: string
+      default: "./Dockerfile"
+    - name: CONTEXT
+      type: string
+      default: "."
+  workspaces:
+    - name: source
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(params.DOCKERFILE)
+        - --context=$(params.CONTEXT)
+        - --destination=$(params.IMAGE)
+        - --cache=true
+      env:
+        - name: DOCKER_CONFIG
+          value: /tekton/home/.docker/

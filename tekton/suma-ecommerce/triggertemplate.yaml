@@ -1,0 +1,28 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: suma-ecommerce-release-template
+spec:
+  params:
+    - name: release-tag
+    - name: repo-name
+    - name: commit-sha
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: suma-ecommerce-pipeline-run-
+      spec:
+        pipelineRef:
+          name: suma-ecommerce-pipeline
+        params:
+          - name: release-tag
+            value: $(tt.params.release-tag)
+          - name: repo-name
+            value: $(tt.params.repo-name)
+          - name: commit-sha
+            value: $(tt.params.commit-sha)
+        workspaces:
+          - name: shared-workspace
+            persistentVolumeClaim:
+              claimName: tekton-pvc
