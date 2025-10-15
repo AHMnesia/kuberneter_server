@@ -24,14 +24,14 @@ resources:
   - elasticsearch/service.yaml
   - elasticsearch/networkpolicy.yaml
   - elasticsearch/node-cert.yaml
-  # - elasticsearch/poddisruptionbudget.yaml
+  - elasticsearch/poddisruptionbudget.yaml
   - elasticsearch/ingress.yaml
   - kibana/namespace.yaml
   - kibana/encryption-secret.yaml
   - kibana/deployment.yaml
   - kibana/service.yaml
   - kibana/networkpolicy.yaml
-  # - kibana/poddisruptionbudget.yaml
+  - kibana/poddisruptionbudget.yaml
   - kibana/ingress.yaml
   - monitoring/namespace.yaml
   - monitoring/configmap.yaml
@@ -51,7 +51,7 @@ resources:
   # - suma-android/deployment.yaml
   # - suma-android/hpa.yaml
   - suma-android/networkpolicy.yaml
-  # - suma-android/poddisruptionbudget.yaml
+  - suma-android/poddisruptionbudget.yaml
   - suma-android/ingress.yaml
 
   - suma-chat/namespace.yaml
@@ -61,9 +61,9 @@ resources:
   - suma-chat/redis-service.yaml
   - suma-chat/service.yaml
   - suma-chat/deployment.yaml
-  # - suma-chat/hpa.yaml
+  - suma-chat/hpa.yaml
   - suma-chat/networkpolicy.yaml
-  # - suma-chat/poddisruptionbudget.yaml
+  - suma-chat/poddisruptionbudget.yaml
   - suma-chat/ingress.yaml
 
   - ngrok/configmap.yaml
@@ -78,7 +78,7 @@ resources:
   # - suma-ecommerce/deployment.yaml
   # - suma-ecommerce/hpa.yaml
   - suma-ecommerce/networkpolicy.yaml
-  # - suma-ecommerce/poddisruptionbudget.yaml
+  - suma-ecommerce/poddisruptionbudget.yaml
   - suma-ecommerce/ingress.yaml
 
   - suma-office/namespace.yaml
@@ -89,7 +89,7 @@ resources:
   # - suma-office/deployment.yaml
   # - suma-office/hpa.yaml
   - suma-office/networkpolicy.yaml
-  # - suma-office/poddisruptionbudget.yaml
+  - suma-office/poddisruptionbudget.yaml
   - suma-office/ingress.yaml
 
   - suma-office-general/namespace.yaml
@@ -100,7 +100,7 @@ resources:
   # - suma-office-general/deployment.yaml
   # - suma-office-general/hpa.yaml
   - suma-office-general/networkpolicy.yaml
-  # - suma-office-general/poddisruptionbudget.yaml
+  - suma-office-general/poddisruptionbudget.yaml
   - suma-office-general/ingress.yaml
 
   - suma-pmo/namespace.yaml
@@ -110,11 +110,11 @@ resources:
   # - suma-pmo/deployment.yaml
   # - suma-pmo/hpa.yaml
   - suma-pmo/networkpolicy.yaml
-  # - suma-pmo/poddisruptionbudget.yaml
+  - suma-pmo/poddisruptionbudget.yaml
   - suma-pmo/ingress.yaml
 
   # 5. Global PDB (dihapus karena duplikat dengan yang spesifik)
-  - app-pdb.yaml
+  # - app-pdb.yaml
 
 # Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
 # Jika ada file tambahan atau error, edit urutan ini.
