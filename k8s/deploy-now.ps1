@@ -1,5 +1,7 @@
 param(
-    [string]$VERSION = 'v1.0.0'
+    [string]$VERSION = 'v1.0.0',
+    [string]$AUTO_SERVICE,  # Nama service untuk auto-deploy (e.g., 'Suma Android')
+    [string]$AUTO_MODE = 'deploy'  # 'deploy' atau 'redeploy'
 )
 
 function Test-ServiceDeployed {
@@ -59,7 +61,8 @@ $services = @(
     @{ Name = 'Suma Office General'; RepoPath = 'suma-office'; K8sPath = 'suma-office-general'; Image = 'suma-office-general-api'; Dockerfile = 'dockerfile.api'; Namespace = 'suma-office-general'; Deployment = 'suma-office-general-api' },
     @{ Name = 'Suma Android'; RepoPath = 'suma-android'; K8sPath = 'suma-android'; Image = 'suma-android-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-android'; Deployment = 'suma-android-api' },
     @{ Name = 'Suma PMO'; RepoPath = 'suma-pmo'; K8sPath = 'suma-pmo'; Image = 'suma-pmo-api'; Dockerfile = 'dockerfile'; Namespace = 'suma-pmo'; Deployment = 'suma-pmo-api' },
-    @{ Name = 'Suma Chat'; RepoPath = 'suma-chat'; K8sPath = 'suma-chat'; Image = 'suma-chat'; Dockerfile = 'dockerfile'; Namespace = 'suma-chat'; Deployment = 'suma-chat' }
+    @{ Name = 'Suma Chat'; RepoPath = 'suma-chat'; K8sPath = 'suma-chat'; Image = 'suma-chat'; Dockerfile = 'dockerfile'; Namespace = 'suma-chat'; Deployment = 'suma-chat' },
+    @{ Name = 'Ngrok'; RepoPath = 'ngrok'; K8sPath = 'ngrok'; Image = 'ngrok/ngrok'; Dockerfile = ''; Namespace = 'suma-chat'; Deployment = 'ngrok' }
 )
 $root = Split-Path $PSScriptRoot -Parent
     $elasticReady = $false
@@ -95,7 +98,24 @@ $deleteMode = $false
 $redeployServices = @()
 $redeployMode = $false
 
-if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
+# Mode auto-deploy jika parameter AUTO_SERVICE diset
+if ($AUTO_SERVICE) {
+    Write-Host "Mode auto-deploy untuk service: $AUTO_SERVICE" -ForegroundColor Green
+    $targetService = $services | Where-Object { $_.Name -eq $AUTO_SERVICE }
+    if ($targetService) {
+        if ($AUTO_MODE -eq 'redeploy') {
+            $redeployServices = @($targetService)
+            $redeployMode = $true
+        } else {
+            $selectedServices = @($targetService)
+            $selectedK8sPaths.Add($targetService.K8sPath.ToLower())
+        }
+        $deployInfraOnly = $true  # Skip infra prompt
+    } else {
+        Write-Host "Service '$AUTO_SERVICE' tidak ditemukan." -ForegroundColor Red
+        exit 1
+    }
+} else {
     Write-Host '=== Pilih Service yang akan dideploy ===' -ForegroundColor Cyan
     for ($i=0; $i -lt $availableServices.Count; $i++) {
         Write-Host ("[$i] {0}" -f $availableServices[$i].Name) -ForegroundColor Yellow
@@ -171,12 +191,7 @@ if ($availableServices.Count -gt 0 -or $skippedServices.Count -gt 0) {
                 Write-Host ("Pilihan service tidak valid: {0}" -f $idx) -ForegroundColor Yellow
             }
         }
-    }
-} else {
-    Write-Host 'Semua service sudah terdeploy. Lewati tahap pemilihan service.' -ForegroundColor Yellow
-}
-
-# Delete selected services if any
+    }# Delete selected services if any
 if ($deleteServices.Count -gt 0) {
     Write-Host '=== Deleting Selected Services ===' -ForegroundColor Red
     Write-Host 'Service yang akan dihapus:' -ForegroundColor Yellow
@@ -300,6 +315,7 @@ if ($redeployServices.Count -gt 0) {
                     # Update deployment image (opsional, atau biarkan kubectl apply update)
                 } else {
                     Write-Host "Menggunakan image existing. Lewati build." -ForegroundColor Cyan
+                    $newVersion = $VERSION
                 }
 
                 Pop-Location
@@ -320,13 +336,15 @@ if ($redeployServices.Count -gt 0) {
                 }
 
                 # Update deployment image to the selected version
-                Write-Host ("Updating deployment {0} to image {1}:{2}..." -f $svc.Deployment, $svc.Image, $VERSION) -ForegroundColor Cyan
+                Write-Host ("Updating deployment {0} to image {1}:{2}..." -f $svc.Deployment, $svc.Image, $newVersion) -ForegroundColor Cyan
                 try {
                     $containerName = kubectl get deployment $($svc.Deployment) -n $($svc.Namespace) -o jsonpath='{.spec.template.spec.containers[0].name}' 2>$null
                     if ($LASTEXITCODE -eq 0 -and $containerName) {
-                        kubectl set image deployment/$($svc.Deployment) $containerName=$($svc.Image):$VERSION -n $($svc.Namespace)
+                        kubectl set image deployment/$($svc.Deployment) $containerName=$($svc.Image):$newVersion -n $($svc.Namespace)
                         if ($LASTEXITCODE -ne 0) {
                             Write-Host "Warning: failed to set image for deployment $($svc.Deployment)" -ForegroundColor Yellow
+                        } else {
+                            Write-Host "Successfully set image to $($svc.Image):$newVersion" -ForegroundColor Green
                         }
                     } else {
                         Write-Host "Warning: could not get container name for deployment $($svc.Deployment)" -ForegroundColor Yellow
@@ -832,20 +850,29 @@ foreach ($svc in $selectedServices) {
 
             if ($imageExists) {
                 Write-Host ("Image {0}:{1} sudah ada." -f $svc.Image, $VERSION) -ForegroundColor Green
-                $useExisting = Read-Host "Gunakan image yang sudah ada? (Y untuk ya, N untuk update versi baru)"
+                if ($AUTO_SERVICE) {
+                    $useExisting = 'N'  # In auto mode, always build new version
+                } else {
+                    $useExisting = Read-Host "Gunakan image yang sudah ada? (Y untuk ya, N untuk update versi baru)"
+                }
                 if ($useExisting.Trim().ToUpperInvariant() -eq 'Y') {
                     Write-Host "Menggunakan image existing. Lewati build." -ForegroundColor Cyan
                 } else {
                     # Tanya versi baru
-                    $newVersion = Read-Host "Masukkan versi baru untuk update (contoh: v1.0.1, atau tekan Enter untuk increment otomatis dari $VERSION)"
-                    if (-not $newVersion.Trim()) {
-                        # Increment otomatis (asumsi format vX.Y.Z)
-                        $versionParts = $VERSION -replace '^v', '' -split '\.'
-                        if ($versionParts.Count -eq 3) {
-                            $patch = [int]$versionParts[2] + 1
-                            $newVersion = "v$($versionParts[0]).$($versionParts[1]).$patch"
-                        } else {
-                            $newVersion = "$VERSION-updated"  # Fallback
+                    if ($AUTO_SERVICE) {
+                        # In auto mode, use the provided VERSION
+                        $newVersion = $VERSION
+                    } else {
+                        $newVersion = Read-Host "Masukkan versi baru untuk update (contoh: v1.0.1, atau tekan Enter untuk increment otomatis dari $VERSION)"
+                        if (-not $newVersion.Trim()) {
+                            # Increment otomatis (asumsi format vX.Y.Z)
+                            $versionParts = $VERSION -replace '^v', '' -split '\.'
+                            if ($versionParts.Count -eq 3) {
+                                $patch = [int]$versionParts[2] + 1
+                                $newVersion = "v$($versionParts[0]).$($versionParts[1]).$patch"
+                            } else {
+                                $newVersion = "$VERSION-updated"  # Fallback
+                            }
                         }
                     }
                     Write-Host ("Update image ke versi {0}..." -f $newVersion) -ForegroundColor Cyan
@@ -1184,3 +1211,4 @@ if (Test-Path $userScript) {
 
 Write-Host ''
 Write-Host '=== Deployment Selesai ===' -ForegroundColor Green
+}

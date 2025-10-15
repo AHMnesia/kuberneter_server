@@ -70,7 +70,7 @@ Ensure-Node
     
 
 # Menjalankan server webhook
-$webhookJs = Join-Path $root 'suma-webhook\webhook.js'
+$webhookJs = Join-Path $root 'suma-webhook\src\webhook.js'
 Write-Host "Mencari file webhook.js di: $webhookJs" -ForegroundColor Gray
 if (Test-Path $webhookJs) {
     $portUsed = Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue
