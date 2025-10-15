@@ -113,12 +113,6 @@ resources:
   # - suma-pmo/poddisruptionbudget.yaml
   - suma-pmo/ingress.yaml
 
-  - suma-webhook/namespace.yaml
-  - suma-webhook/certificate.yaml
-  - suma-webhook/endpoints.yaml
-  - suma-webhook/service.yaml
-  - suma-webhook/ingress.yaml
-
   # 5. Global PDB (dihapus karena duplikat dengan yang spesifik)
   - app-pdb.yaml
 
