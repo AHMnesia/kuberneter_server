@@ -6,7 +6,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Ganti jika pakai self-signed
+    cert-manager.io/cluster-issuer: "clusterissuer-selfsigned"  # Pakai self-signed
 spec:
   ingressClassName: nginx
   tls:

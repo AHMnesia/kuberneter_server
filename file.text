@@ -27,3 +27,17 @@ spec:
     automated:
       prune: true  # Hapus resource yang tidak ada di Git
       selfHeal: true  # Auto-sync jika ada drift
+
+
+
+# Instalasi Tekton CI/CD di Kubernetes
+kubectl create namespace tekton-pipelines
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml  # Untuk triggers dari Git
+kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml  # Opsional, untuk UI
+
+# expose port 9097
+kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097
+
+
+
