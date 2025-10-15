@@ -11,7 +11,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: standard
+  storageClassName: hostpath
   volumeMode: Filesystem
   resources:
     requests:
@@ -30,7 +30,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: standard
+  storageClassName: hostpath
   volumeMode: Filesystem
   resources:
     requests:
