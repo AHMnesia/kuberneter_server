@@ -112,3 +112,10 @@ resources:
   # - suma-pmo/networkpolicy.yaml
   # - suma-pmo/poddisruptionbudget.yaml
   # - suma-pmo/ingress.yaml
+
+  # 5. Dashboard ArgoCD dan Tekton
+  - argocd-dashboard-ingress.yaml
+  - tekton-dashboard-ingress.yaml
+
+# Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
+# Jika ada file tambahan atau error, edit urutan ini.

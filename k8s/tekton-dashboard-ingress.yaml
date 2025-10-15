@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tekton-dashboard-ingress
+  namespace: tekton-pipelines
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Ganti jika pakai self-signed
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - tekton.local
+    secretName: tekton-dashboard-tls
+  rules:
+  - host: tekton.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tekton-dashboard
+            port:
+              number: 9097
