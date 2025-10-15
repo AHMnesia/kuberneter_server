@@ -113,8 +113,5 @@ resources:
   - suma-pmo/poddisruptionbudget.yaml
   - suma-pmo/ingress.yaml
 
-  # 5. Global PDB (dihapus karena duplikat dengan yang spesifik)
-  # - app-pdb.yaml
-
 # Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
 # Jika ada file tambahan atau error, edit urutan ini.
