@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: suma-office-general-api-hpa
-  namespace: suma-office
+  namespace: suma-office-general
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
