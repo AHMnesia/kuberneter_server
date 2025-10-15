@@ -15,24 +15,24 @@ resources:
   # 3. Infra pendukung (redis, elasticsearch, kibana, monitoring)
   # - redis/namespace.yaml
   # - redis/redis-cluster.yaml
-  - elasticsearch/namespace.yaml
-  - elasticsearch/ca-cert.yaml
-  - elasticsearch/issuer-ca.yaml
-  - elasticsearch/issuer-selfsigned.yaml
-  - elasticsearch/certificate.yaml
-  - elasticsearch/statefulset.yaml
-  - elasticsearch/service.yaml
-  - elasticsearch/networkpolicy.yaml
-  - elasticsearch/node-cert.yaml
-  - elasticsearch/poddisruptionbudget.yaml
-  - elasticsearch/ingress.yaml
-  - kibana/namespace.yaml
-  - kibana/encryption-secret.yaml
-  - kibana/deployment.yaml
-  - kibana/service.yaml
-  - kibana/networkpolicy.yaml
-  - kibana/poddisruptionbudget.yaml
-  - kibana/ingress.yaml
+  # - elasticsearch/namespace.yaml
+  # - elasticsearch/ca-cert.yaml
+  # - elasticsearch/issuer-ca.yaml
+  # - elasticsearch/issuer-selfsigned.yaml
+  # - elasticsearch/certificate.yaml
+  # - elasticsearch/statefulset.yaml
+  # - elasticsearch/service.yaml
+  # - elasticsearch/networkpolicy.yaml
+  # - elasticsearch/node-cert.yaml
+  # - elasticsearch/poddisruptionbudget.yaml
+  # - elasticsearch/ingress.yaml
+  # - kibana/namespace.yaml
+  # - kibana/encryption-secret.yaml
+  # - kibana/deployment.yaml
+  # - kibana/service.yaml
+  # - kibana/networkpolicy.yaml
+  # - kibana/poddisruptionbudget.yaml
+  # - kibana/ingress.yaml
   - monitoring/namespace.yaml
   - monitoring/configmap.yaml
   - monitoring/rbac.yaml
@@ -112,6 +112,3 @@ resources:
   # - suma-pmo/networkpolicy.yaml
   # - suma-pmo/poddisruptionbudget.yaml
   # - suma-pmo/ingress.yaml
-
-# Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
-# Jika ada file tambahan atau error, edit urutan ini.
