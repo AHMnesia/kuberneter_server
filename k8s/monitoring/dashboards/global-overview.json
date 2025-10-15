@@ -112,7 +112,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "label_replace(probe_success{job=~\"ingress-nginx-health|elasticsearch-health|kibana-health|suma-ecommerce-api-health|suma-office-api-health|suma-office-general-api-health|suma-pmo-api-health|suma-android-api-health|suma-webhook-health|suma-chat-health|redis-health\"}, \"job\", \"$1\", \"job\", \"(.*)-health\") or up{job=~\"prometheus|blackbox\"}",
+          "expr": "label_replace(probe_success{job=~\"ingress-nginx-health|elasticsearch-health|kibana-health|suma-ecommerce-api-health|suma-office-api-health|suma-office-general-api-health|suma-pmo-api-health|suma-android-api-health|suma-chat-health|redis-health\"}, \"job\", \"$1\", \"job\", \"(.*)-health\") or up{job=~\"prometheus|blackbox\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
