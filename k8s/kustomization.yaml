@@ -44,15 +44,15 @@ resources:
   - monitoring/ingress.yaml
 
   # 4. Service aplikasi (namespace dulu, lalu lainnya)
-  - suma-android/namespace.yaml
-  - suma-android/certificate.yaml
-  - suma-android/pvc.yaml
-  - suma-android/service.yaml
+  # - suma-android/namespace.yaml
+  # - suma-android/certificate.yaml
+  # - suma-android/pvc.yaml
+  # - suma-android/service.yaml
   # - suma-android/deployment.yaml
   # - suma-android/hpa.yaml
-  - suma-android/networkpolicy.yaml
-  - suma-android/poddisruptionbudget.yaml
-  - suma-android/ingress.yaml
+  # - suma-android/networkpolicy.yaml
+  # - suma-android/poddisruptionbudget.yaml
+  # - suma-android/ingress.yaml
 
   - suma-chat/namespace.yaml
   - suma-chat/certificate.yaml
@@ -71,47 +71,47 @@ resources:
   - ngrok/deployments.yaml
   - ngrok/service.yaml
 
-  - suma-ecommerce/namespace.yaml
-  - suma-ecommerce/certificate.yaml
-  - suma-ecommerce/pvc.yaml
-  - suma-ecommerce/service.yaml
+  # - suma-ecommerce/namespace.yaml
+  # - suma-ecommerce/certificate.yaml
+  # - suma-ecommerce/pvc.yaml
+  # - suma-ecommerce/service.yaml
   # - suma-ecommerce/deployment.yaml
   # - suma-ecommerce/hpa.yaml
-  - suma-ecommerce/networkpolicy.yaml
-  - suma-ecommerce/poddisruptionbudget.yaml
-  - suma-ecommerce/ingress.yaml
+  # - suma-ecommerce/networkpolicy.yaml
+  # - suma-ecommerce/poddisruptionbudget.yaml
+  # - suma-ecommerce/ingress.yaml
 
-  - suma-office/namespace.yaml
-  - suma-office/certificate.yaml
-  - suma-office/configmap.yaml
-  - suma-office/pvc.yaml
-  - suma-office/service.yaml
+  # - suma-office/namespace.yaml
+  # - suma-office/certificate.yaml
+  # - suma-office/configmap.yaml
+  # - suma-office/pvc.yaml
+  # - suma-office/service.yaml
   # - suma-office/deployment.yaml
   # - suma-office/hpa.yaml
-  - suma-office/networkpolicy.yaml
-  - suma-office/poddisruptionbudget.yaml
-  - suma-office/ingress.yaml
+  # - suma-office/networkpolicy.yaml
+  # - suma-office/poddisruptionbudget.yaml
+  # - suma-office/ingress.yaml
 
-  - suma-office-general/namespace.yaml
-  - suma-office-general/certificate.yaml
-  - suma-office-general/configmap.yaml
-  - suma-office-general/pvc.yaml
-  - suma-office-general/service.yaml
+  # - suma-office-general/namespace.yaml
+  # - suma-office-general/certificate.yaml
+  # - suma-office-general/configmap.yaml
+  # - suma-office-general/pvc.yaml
+  # - suma-office-general/service.yaml
   # - suma-office-general/deployment.yaml
   # - suma-office-general/hpa.yaml
-  - suma-office-general/networkpolicy.yaml
-  - suma-office-general/poddisruptionbudget.yaml
-  - suma-office-general/ingress.yaml
+  # - suma-office-general/networkpolicy.yaml
+  # - suma-office-general/poddisruptionbudget.yaml
+  # - suma-office-general/ingress.yaml
 
-  - suma-pmo/namespace.yaml
-  - suma-pmo/certificate.yaml
-  - suma-pmo/pvc.yaml
-  - suma-pmo/service.yaml
+  # - suma-pmo/namespace.yaml
+  # - suma-pmo/certificate.yaml
+  # - suma-pmo/pvc.yaml
+  # - suma-pmo/service.yaml
   # - suma-pmo/deployment.yaml
   # - suma-pmo/hpa.yaml
-  - suma-pmo/networkpolicy.yaml
-  - suma-pmo/poddisruptionbudget.yaml
-  - suma-pmo/ingress.yaml
+  # - suma-pmo/networkpolicy.yaml
+  # - suma-pmo/poddisruptionbudget.yaml
+  # - suma-pmo/ingress.yaml
 
 # Catatan: File di update/ adalah script PowerShell, bukan YAML, jadi tidak disertakan.
 # Jika ada file tambahan atau error, edit urutan ini.
