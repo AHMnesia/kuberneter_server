@@ -13,8 +13,8 @@ resources:
   - certs/api-public-cert.yaml
 
   # 3. Infra pendukung (redis, elasticsearch, kibana, monitoring)
-  - redis/namespace.yaml
-  - redis/redis-cluster.yaml
+  # - redis/namespace.yaml
+  # - redis/redis-cluster.yaml
   - elasticsearch/namespace.yaml
   - elasticsearch/ca-cert.yaml
   - elasticsearch/issuer-ca.yaml
