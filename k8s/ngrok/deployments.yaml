@@ -1,5 +1,5 @@
 # File deployments.yaml untuk Ngrok
-# Resource yang disertakan: Deployment, Service
+# Resource yang disertakan: Deployment
 # Catatan: ConfigMap dan Secret dipisah ke file terpisah
 ---
 # Deployment untuk Ngrok
@@ -54,19 +54,3 @@ spec:
       - name: ngrok-config
         configMap:
           name: ngrok-config
----
-# Service untuk expose Ngrok web interface
-apiVersion: v1
-kind: Service
-metadata:
-  name: ngrok
-  namespace: suma-chat
-spec:
-  selector:
-    app: ngrok
-  ports:
-  - name: web
-    port: 4040
-    targetPort: 4040
-    protocol: TCP
-  type: ClusterIP
