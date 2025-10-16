@@ -25,6 +25,13 @@ spec:
               number: 9097
         path: /
         pathType: Prefix
+      - backend:
+          service:
+            name: el-suma-ecommerce-release-listener
+            port:
+              number: 8080
+        path: /suma-ecommerce
+        pathType: Prefix
   tls:
   - hosts:
     - tekton.local
