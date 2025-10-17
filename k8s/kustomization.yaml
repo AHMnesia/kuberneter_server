@@ -47,8 +47,8 @@ resources:
   # 6. Tekton Deploy (non-CRD resources)
   - tekton/tekton-pipelines-noncrd.yaml
   - tekton/tekton-triggers-noncrd.yaml
-  - tekton/dashboard-ingress.yaml
-  - tekton/eventlistener-ingress.yaml
+  - tekton/ingress-dashboard.yaml
+  - tekton/ingress-eventlistener.yaml
   - tekton/github-secret.yaml
   - tekton/pvc.yaml
   - tekton/rbac.yaml
