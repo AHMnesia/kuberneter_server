@@ -2491,7 +2491,8 @@ spec:
       serviceAccountName: tekton-pipelines-resolvers
       containers:
         - name: controller
-          image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/resolvers:v0.63.0@sha256:e3d170eb9bc04c6ee69306529c2f82e84296a52414e136ef16995ac179abcd12
+          image: ghcr.io/tektoncd/pipeline/resolvers:v0.63.0
+          imagePullPolicy: Never
           resources:
             requests:
               cpu: 100m
