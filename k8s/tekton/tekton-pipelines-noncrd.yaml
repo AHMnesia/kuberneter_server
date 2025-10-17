@@ -1576,6 +1576,7 @@ spec:
       containers:
         - name: tekton-pipelines-controller
           image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.63.0@sha256:fd66b42c1076dec4430ab6767919e56c95b6a547c9696c40e06329c7b3b932ba
+          imagePullPolicy: Never
           args: [
             # These images are built on-demand by `ko resolve` and are replaced
             # by image references by digest.
@@ -1759,6 +1760,7 @@ spec:
       containers:
         - name: tekton-events-controller
           image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/events:v0.63.0@sha256:709181f33f41654e39a74087194c61a20e515dcc530cbb99af8c8426f4ddc266
+          imagePullPolicy: Never
           args: []
           volumeMounts:
             - name: config-logging
