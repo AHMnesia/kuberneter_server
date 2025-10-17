@@ -7,6 +7,6 @@ spec:
     - name: release-tag
       value: $(body.release.tag_name)
     - name: repo-name
-      value: $(body.repository.name)
+      value: suma_ecommerce_api
     - name: commit-sha
       value: $(body.release.target_commitish)

@@ -19,7 +19,7 @@ spec:
         name: git-clone
       params:
         - name: url
-          value: "https://github.com/AHMnesia/$(params.repo-name).git"
+          value: "https://github.com/programmersuma/suma_ecommerce_api.git"
         - name: revision
           value: $(params.commit-sha)
       workspaces:
@@ -32,7 +32,7 @@ spec:
       runAfter: [checkout-code]
       params:
         - name: IMAGE
-          value: "ahmnesia/$(params.repo-name):$(params.release-tag)"
+          value: "ghcr.io/programmersuma/suma_ecommerce_api:$(params.release-tag)"
         - name: DOCKERFILE
           value: "./dockerfile"
         - name: CONTEXT
@@ -49,7 +49,7 @@ spec:
         - name: deployment-file
           value: "k8s/suma-ecommerce/deployment.yaml"
         - name: image-name
-          value: "ahmnesia/$(params.repo-name):$(params.release-tag)"
+          value: "ghcr.io/programmersuma/suma_ecommerce_api:$(params.release-tag)"
       workspaces:
         - name: source
           workspace: shared-workspace

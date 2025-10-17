@@ -20,7 +20,7 @@ spec:
             name: "cel"
           params:
             - name: "filter"
-              value: "body.action == 'published' && body.release.target_commitish == 'production' && body.repository.name == 'suma-ecommerce'"
+              value: "body.action == 'published' && body.release.target_commitish == 'production' && body.repository.name == 'suma_ecommerce_api'"
       bindings:
         - ref: suma-ecommerce-release-binding
       template:
