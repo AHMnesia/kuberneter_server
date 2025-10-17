@@ -28,6 +28,11 @@ spec:
       prune: true  # Hapus resource yang tidak ada di Git
       selfHeal: true  # Auto-sync jika ada drift
 
+# cara restart kube-dns
+# note: ini akan menyebabkan downtime sementara pada DNS
+# dilakukan mengarah ke github tidakbisa
+kubectl delete pod -n kube-system -l k8s-app=kube-dns
+
 
 
 # Instalasi Tekton CI/CD di Kubernetes
@@ -38,6 +43,9 @@ kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest
 
 # expose port 9097
 kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097
+
+# Terapkan contoh pipeline Tekton dari file lokal
+kubectl apply -f c:\docker\tekton
 
 
 
