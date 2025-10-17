@@ -8,21 +8,28 @@ spec:
       type: string
     - name: image-name
       type: string
+    - name: gitops-repo
+      type: string
+      default: "https://github.com/AHMnesia/kuberneter_server.git"
+    - name: gitops-branch
+      type: string
+      default: "main"
   workspaces:
     - name: source
   steps:
-    - name: setup-git
+    - name: clone-gitops
       image: alpine/git:latest
       script: |
-        set -e
-        cd $(workspaces.source.path)/source
+        git clone $(params.gitops-repo) $(workspaces.source.path)/gitops
+        cd $(workspaces.source.path)/gitops
+        git checkout $(params.gitops-branch)
         git config user.email "tekton@example.com"
         git config user.name "tekton-bot"
     - name: update-yaml
       image: alpine/git:latest
       script: |
         set -e
-        cd $(workspaces.source.path)/source
+        cd $(workspaces.source.path)/gitops
         if [ ! -f "$(params.deployment-file)" ]; then
           echo "File not found: $(params.deployment-file)"
           exit 1
@@ -34,6 +41,6 @@ spec:
       image: alpine/git:latest
       script: |
         set -e
-        cd $(workspaces.source.path)/source
+        cd $(workspaces.source.path)/gitops
         # gunakan credential helper atau SSH agent yang telah disediakan lewat volume/secret
-        git push origin main
+        git push origin $(params.gitops-branch)
