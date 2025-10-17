@@ -1,28 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-patches:
-  - path: tekton/pipelines-crd-patch.yaml
-    target:
-      kind: CustomResourceDefinition
-      name: pipelines.tekton.dev
-  - path: tekton/tasks-crd-patch.yaml
-    target:
-      kind: CustomResourceDefinition
-      name: tasks.tekton.dev
-  - path: tekton/pipelineruns-crd-patch.yaml
-    target:
-      kind: CustomResourceDefinition
-      name: pipelineruns.tekton.dev
-  - path: tekton/taskruns-crd-patch.yaml
-    target:
-      kind: CustomResourceDefinition
-      name: taskruns.tekton.dev
-  - path: tekton/resolutionrequests-crd-patch.yaml
-    target:
-      kind: CustomResourceDefinition
-      name: resolutionrequests.resolution.tekton.dev
-
 # Urutan apply resources untuk menghindari dependency error (namespace, cert-manager, dll. dulu)
 resources:
   # 1. Vendors (cert-manager, ingress-nginx, metrics-server)
