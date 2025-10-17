@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: suma-ecommerce-pipeline
@@ -55,7 +55,7 @@ spec:
           workspace: shared-workspace
 
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: git-clone
@@ -81,7 +81,7 @@ spec:
         echo -n $(git rev-parse HEAD) > $(results.commit.path)
 
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: kaniko

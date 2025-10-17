@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: update-deployment
@@ -11,11 +11,29 @@ spec:
   workspaces:
     - name: source
   steps:
+    - name: setup-git
+      image: alpine/git:latest
+      script: |
+        set -e
+        cd $(workspaces.source.path)/source
+        git config user.email "tekton@example.com"
+        git config user.name "tekton-bot"
     - name: update-yaml
       image: alpine/git:latest
       script: |
+        set -e
         cd $(workspaces.source.path)/source
+        if [ ! -f "$(params.deployment-file)" ]; then
+          echo "File not found: $(params.deployment-file)"
+          exit 1
+        fi
         sed -i 's|image: .*|image: "$(params.image-name)"|' $(params.deployment-file)
         git add $(params.deployment-file)
-        git commit -m "Update suma-ecommerce image to $(params.image-name)"
+        git commit -m "Update suma-ecommerce image to $(params.image-name)" || echo "no changes to commit"
+    - name: push-changes
+      image: alpine/git:latest
+      script: |
+        set -e
+        cd $(workspaces.source.path)/source
+        # gunakan credential helper atau SSH agent yang telah disediakan lewat volume/secret
         git push origin main
