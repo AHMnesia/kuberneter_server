@@ -128,6 +128,8 @@ resources:
   - tekton/triggers-sa-default.yaml
 
   # 8. Tekton Pipelines dan Triggers (suma-ecommerce)
+  - tekton/suma-ecommerce/git-clone-task.yaml
+  - tekton/suma-ecommerce/kaniko-task.yaml
   - tekton/suma-ecommerce/pipeline.yaml
   - tekton/suma-ecommerce/triggerbinding.yaml
   - tekton/suma-ecommerce/triggertemplate.yaml
