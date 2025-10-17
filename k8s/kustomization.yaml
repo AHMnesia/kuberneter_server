@@ -114,7 +114,7 @@ resources:
   # - suma-pmo/ingress.yaml
 
   # 5. Dashboard ArgoCD
-  - argocd-dashboard-ingress.yaml
+  - argocd/dashboard-ingress.yaml
 
   # 6. Tekton Deploy (ClusterRole, Namespace, dll. dulu)
   - tekton/pipelines-v0.63.0.yaml
