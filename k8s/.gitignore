@@ -1,0 +1,6 @@
+# Ignore Tekton secret templates containing credentials
+k8s/tekton/ghcr-secret.yaml
+k8s/tekton/github-secret.yaml
+
+# Ignore any other local secret yaml files
+**/secret*.yaml
