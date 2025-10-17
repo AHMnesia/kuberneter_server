@@ -119,13 +119,13 @@ resources:
   - tekton-eventlistener-ingress.yaml
 
   # 6. Tekton Pipelines dan Triggers
-  - ../tekton/github-secret.yaml
-  - ../tekton/pvc.yaml
-  - ../tekton/rbac.yaml
-  - ../tekton/tekton-triggers-clusterrole.yaml
-  - ../tekton/tekton-triggers-sa-default.yaml
-  - ../tekton/suma-ecommerce/pipeline.yaml
-  - ../tekton/suma-ecommerce/triggerbinding.yaml
-  - ../tekton/suma-ecommerce/triggertemplate.yaml
-  - ../tekton/suma-ecommerce/update-deployment-task.yaml
-  - ../tekton/suma-ecommerce/eventlistener.yaml
+  - tekton/github-secret.yaml
+  - tekton/pvc.yaml
+  - tekton/rbac.yaml
+  - tekton/tekton-triggers-clusterrole.yaml
+  - tekton/tekton-triggers-sa-default.yaml
+  - tekton/suma-ecommerce/pipeline.yaml
+  - tekton/suma-ecommerce/triggerbinding.yaml
+  - tekton/suma-ecommerce/triggertemplate.yaml
+  - tekton/suma-ecommerce/update-deployment-task.yaml
+  - tekton/suma-ecommerce/eventlistener.yaml

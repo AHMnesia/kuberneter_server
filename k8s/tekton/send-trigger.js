@@ -72,7 +72,8 @@ function parseArgs() {
       'X-GitHub-Event': 'release',
       'X-Hub-Signature': signature
     },
-    timeout: 10000
+    timeout: 10000,
+    rejectUnauthorized: false
   };
 
   const lib = isHttps ? https : http;
