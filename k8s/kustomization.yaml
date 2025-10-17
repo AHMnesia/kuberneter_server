@@ -117,8 +117,6 @@ resources:
   - argocd/dashboard-ingress.yaml
 
   # 6. Tekton Deploy (ClusterRole, Namespace, dll. dulu)
-  - tekton/pipelines-v0.63.0.yaml
-  - tekton/triggers-v0.33.0.yaml
   - tekton/dashboard-ingress.yaml
   - tekton/eventlistener-ingress.yaml
   - tekton/github-secret.yaml
