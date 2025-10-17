@@ -32,7 +32,7 @@ spec:
       runAfter: [checkout-code]
       params:
         - name: IMAGE
-          value: "ghcr.io/programmersuma/suma_ecommerce_api:$(params.release-tag)"
+          value: "localhost:5000/suma_ecommerce_api:$(params.release-tag)"
         - name: DOCKERFILE
           value: "./dockerfile"
         - name: CONTEXT
@@ -49,7 +49,8 @@ spec:
         - name: deployment-file
           value: "k8s/suma-ecommerce/deployment.yaml"
         - name: image-name
-          value: "ghcr.io/programmersuma/suma_ecommerce_api:$(params.release-tag)"
+          # use local image name so Deployment (which uses imagePullPolicy: Never) matches
+          value: "suma-ecommerce-api:$(params.release-tag)"
       workspaces:
         - name: source
           workspace: shared-workspace

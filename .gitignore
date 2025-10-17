@@ -7,5 +7,4 @@
 
 
 # Ignore Tekton secret templates containing credentials
-k8s/tekton/ghcr-secret.yaml
 k8s/tekton/github-secret.yaml
