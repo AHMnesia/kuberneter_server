@@ -1,3 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tekton-pipelines
+
+---
 # Tekton non-CRD resources (trimmed)
 # This file should contain the full set of namespaced/non-CRD resources
 # required by Tekton (ServiceAccounts, Roles, RoleBindings, Deployments,
