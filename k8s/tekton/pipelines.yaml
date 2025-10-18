@@ -1,9 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: tekton-pipelines
-
----
 # Tekton non-CRD resources (trimmed)
 # This file should contain the full set of namespaced/non-CRD resources
 # required by Tekton (ServiceAccounts, Roles, RoleBindings, Deployments,
@@ -51,14 +45,6 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: tekton-pipelines
-  labels:
-    app.kubernetes.io/instance: default
-    app.kubernetes.io/part-of: tekton-pipelines
-    pod-security.kubernetes.io/enforce: restricted
 
 ---
 # (Other non-CRD resources from the original tekton-pipelines-noncrd.yaml follow)
