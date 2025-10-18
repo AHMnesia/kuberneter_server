@@ -1,3 +1,40 @@
+## Tekton CRDs backup
+# This file intentionally contains references and instructions to re-install
+# the Tekton CustomResourceDefinitions (CRDs). The CRD definitions were
+# removed from the main Tekton manifests to avoid ArgoCD continuously
+# reconciling cluster-scoped CRDs. Install CRDs once using one of the
+# options below.
+
+# Recommended (use upstream release - run once):
+## kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+## kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+
+# If you want to keep an offline/checked-in copy of CRDs, you can generate
+# the CRD YAML from the release and save here. For brevity this file does not
+# include the full CRD documents; use the upstream release or export them
+# from your cluster (kubectl get crd -o yaml > tekton-crds-backup.yaml).
+
+# Example list of Tekton CRDs that were removed from the repo (informational):
+# - customruns.tekton.dev
+# - pipelines.tekton.dev
+# - pipelineruns.tekton.dev
+# - tasks.tekton.dev
+# - taskruns.tekton.dev
+# - stepactions.tekton.dev
+# - resolutionrequests.resolution.tekton.dev
+# - verificationpolicies.tekton.dev
+# - (and other tekton.* and triggers.* CRDs)
+
+# To export CRDs from a cluster that already has Tekton installed:
+# kubectl get crd customruns.tekton.dev pipelines.tekton.dev pipelineruns.tekton.dev tasks.tekton.dev taskruns.tekton.dev -o yaml > tekton-crds-backup.yaml
+
+# To apply the CRDs from this backup (if you populate them here):
+# kubectl apply -f k8s/tekton/tekton-crds-backup.yaml
+
+# Notes:
+# - Only apply CRDs once (bootstrap). Do not keep managing them in an
+#   app that is continuously reconciled by ArgoCD, unless you intentionally
+#   manage CRDs with a separate ArgoCD Application.
 ---
 # Backup of Tekton CRD-containing manifests
 # This file is a repository-level backup copy of the original Tekton manifests

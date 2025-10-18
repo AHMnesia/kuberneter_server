@@ -2,6 +2,59 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: tekton-pipelines
+
+---
+# Tekton non-CRD resources (trimmed)
+# This file should contain the full set of namespaced/non-CRD resources
+# required by Tekton (ServiceAccounts, Roles, RoleBindings, Deployments,
+# Services, ConfigMaps, PVCs, etc.). The full non-CRD content was truncated for
+# brevity; if you have the original non-CRD blocks, paste them here.
+
+# Example placeholders (replace with actual content from original file):
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-pipelines-controller
+  namespace: tekton-pipelines
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-pipelines-webhook
+  namespace: tekton-pipelines
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tekton-pipelines-controller
+  namespace: tekton-pipelines
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tekton-pipelines-controller
+  template:
+    metadata:
+      labels:
+        app: tekton-pipelines-controller
+    spec:
+      serviceAccountName: tekton-pipelines-controller
+      containers:
+        - name: tekton-pipelines-controller
+          image: ghcr.io/tektoncd/pipeline/controller:latest
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tekton-pipelines
   labels:
     app.kubernetes.io/instance: default
     app.kubernetes.io/part-of: tekton-pipelines
