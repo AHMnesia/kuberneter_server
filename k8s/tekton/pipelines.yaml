@@ -43,7 +43,7 @@ spec:
       serviceAccountName: tekton-pipelines-controller
       containers:
         - name: tekton-pipelines-controller
-          image: docker.io/tektoncd/pipeline-controller:v0.33.0
+          image: quay.io/tektoncd/pipeline/cmd/controller:v1.5.0
           resources:
             requests:
               cpu: "100m"
