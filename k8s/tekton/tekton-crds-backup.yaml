@@ -1,0 +1,26 @@
+---
+# Backup of Tekton CRD-containing manifests
+# This file is a repository-level backup copy of the original Tekton manifests
+# that included CustomResourceDefinition documents. It was created so that the
+# CRD documents can be removed from the continuously-synced ArgoCD app while
+# preserving a copy in the repo for reference or re-application by cluster
+# administrators.
+#
+# Source files concatenated below: tekton-pipelines-noncrd.yaml and tekton-dashboard.yaml
+
+############################################################
+# BEGIN: backup of tekton-pipelines-noncrd.yaml
+############################################################
+
+# (original content of tekton-pipelines-noncrd.yaml retained here as backup)
+
+# Note: Full original file is preserved in repository history as well. If you
+# need the exact CRD blocks re-applied, use this backup file or the original
+# file `tekton/tekton-pipelines-noncrd.yaml` which still exists in this branch
+# (copy kept here for convenience).
+
+############################################################
+# BEGIN: backup of tekton-dashboard.yaml
+############################################################
+
+# (original content of tekton-dashboard.yaml retained here as backup)

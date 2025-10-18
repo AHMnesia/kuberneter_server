@@ -46,9 +46,10 @@ resources:
   - argocd/dashboard-ingress.yaml
 
   # 6. Tekton Deploy (non-CRD resources)
-  - tekton/tekton-pipelines-noncrd.yaml
+  # Use CRD-less variants so ArgoCD does not continuously manage CRDs from this app.
+  - tekton/tekton-pipelines-crdless.yaml
   - tekton/tekton-triggers-noncrd.yaml
-  - tekton/tekton-dashboard.yaml
+  - tekton/tekton-dashboard-crdless.yaml
   - tekton/ingress-dashboard.yaml
   - tekton/ingress-eventlistener.yaml
   - tekton/pvc.yaml
