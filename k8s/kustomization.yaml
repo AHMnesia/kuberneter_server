@@ -25,6 +25,7 @@ resources:
 
   # 4. Service aplikasi (suma-chat)
   - suma-chat/namespace.yaml
+  - suma-chat/secret.yaml
   - suma-chat/certificate.yaml
   - suma-chat/configmap.yaml
   - suma-chat/redis-deployment.yaml
