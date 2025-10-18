@@ -54,7 +54,6 @@ resources:
   - tekton/ingress-eventlistener.yaml
   - tekton/pvc.yaml
   - tekton/rbac.yaml
-  - tekton/github-secret.yaml
   - tekton/triggers-clusterrole.yaml
   - tekton/triggers-sa-default.yaml
 
