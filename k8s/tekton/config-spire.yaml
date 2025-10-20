@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-spire
+  namespace: tekton-pipelines
+data:
+  # minimal placeholder so controller finds the ConfigMap
+  enabled: "false"

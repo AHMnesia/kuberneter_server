@@ -64,6 +64,7 @@ resources:
   - tekton/config-tracing.yaml
   - tekton/config-wait-exponential-backoff.yaml
   - tekton/config-events.yaml
+  - tekton/config-spire.yaml
 
   # 7. Tekton Pipelines dan Triggers (suma-ecommerce)
   - tekton/suma-ecommerce/git-clone-task.yaml
