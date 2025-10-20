@@ -3,8 +3,6 @@ kind: Kustomization
 
 # Urutan apply resources untuk menghindari dependency error (namespace, cert-manager, dll. dulu)
 resources:
-  # 0. CRD ServiceMonitor
-  - crd/servicemonitor-crd.yaml
   # 1. Vendors (cert-manager, ingress-nginx, metrics-server)
   - vendors/
 
