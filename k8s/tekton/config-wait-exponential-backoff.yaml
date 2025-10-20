@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-wait-exponential-backoff
+  namespace: tekton-pipelines
+data:
+  # placeholder values; controller uses this to configure retry/backoff behaviour
+  base-delay: "1s"
+  max-delay: "1m"
+  factor: "2"
