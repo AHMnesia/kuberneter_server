@@ -11,7 +11,7 @@ resources:
 
   # 3. ArgoCD dan Tekton
   - argocd/
-  - tekton/
+  # - tekton/
 
   # 4. Infra pendukung (redis, elasticsearch, kibana, monitoring)
   # - redis/

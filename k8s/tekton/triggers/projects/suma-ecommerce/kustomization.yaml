@@ -9,3 +9,6 @@ resources:
   - triggerbinding.yaml
   - triggertemplate.yaml
   - update-deployment-task.yaml
+
+patches:
+  - path: patch-remove-github-interceptor.yaml

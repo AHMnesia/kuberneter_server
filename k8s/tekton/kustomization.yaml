@@ -5,6 +5,5 @@ resources:
   - core/
   - configs/
   - ingress/
-  - patches/
   - triggers/core/
   - triggers/projects/suma-ecommerce/

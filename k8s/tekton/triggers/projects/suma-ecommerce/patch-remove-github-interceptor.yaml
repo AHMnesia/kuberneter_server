@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: suma-ecommerce-release-listener
+spec:
+  triggers:
+  - interceptors:
+    - ref:
+        name: cel
+      params:
+      - name: filter
+        value: "body.action == 'published' && body.release.target_commitish == 'production' && body.repository.name == 'suma_ecommerce_api'"
