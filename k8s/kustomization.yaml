@@ -56,6 +56,13 @@ resources:
   - tekton/rbac.yaml
   - tekton/triggers-clusterrole.yaml
   - tekton/triggers-sa-default.yaml
+  # Additional config and debug manifests added for cluster startup
+  - tekton/config-defaults-v0.63.yaml
+  - tekton/clusterrole-configmaps.yaml
+  - tekton/config-logging.yaml
+  - tekton/config-observability.yaml
+  - tekton/config-tracing.yaml
+  - tekton/config-wait-exponential-backoff.yaml
 
   # 7. Tekton Pipelines dan Triggers (suma-ecommerce)
   - tekton/suma-ecommerce/git-clone-task.yaml
