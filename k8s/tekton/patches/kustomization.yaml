@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
   - patch-el-eventlistener-payload-validation.yaml
-  - patch-remove-github-interceptor.yaml
