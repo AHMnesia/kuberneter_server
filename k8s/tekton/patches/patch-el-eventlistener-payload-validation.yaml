@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: el-suma-ecommerce-release-listener
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: event-listener
+          args:
+            - "--el-name=suma-ecommerce-release-listener"
+            - "--el-namespace=default"
+            - "--port=8080"
+            - "--readtimeout=5"
+            - "--writetimeout=40"
+            - "--idletimeout=120"
+            - "--timeouthandler=30"
+            - "--httpclient-readtimeout=30"
+            - "--httpclient-keep-alive=30"
+            - "--httpclient-tlshandshaketimeout=10"
+            - "--httpclient-responseheadertimeout=10"
+            - "--httpclient-expectcontinuetimeout=1"
+            - "--is-multi-ns=false"
+            - "--payload-validation=false"
+            - "--cloudevent-uri="
+            - "--tls-cert="
+            - "--tls-key="
