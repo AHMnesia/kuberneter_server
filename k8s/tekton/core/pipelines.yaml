@@ -1,88 +1,39 @@
 apiVersion: v1
-kind: Namespace
-apiVersion: v1
-kind: Namespace
+kind: ConfigMap
 metadata:
-  name: tekton-pipelines
-
----
-# Service accounts used by Tekton components
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tekton-pipelines-controller
-  apiVersion: v1
-  kind: Namespace
-  metadata:
-    name: tekton-pipelines
-
-  ---
-  ---
-  # ServiceAccounts used by Tekton components
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: tekton-pipelines-controller
-    namespace: tekton-pipelines
-
-  ---
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: tekton-pipelines-webhook
-    namespace: tekton-pipelines
-
-  ---
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: tekton-triggers-controller
-    namespace: tekton-pipelines
-
-  ---
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: tekton-triggers-webhook
-    namespace: tekton-pipelines
-
-  ---
-  # Minimal Deployment for Tekton Pipelines controller (standardized image)
-  # Note: Keep imagePullSecrets configured in the cluster if your nodes need
-  # authenticated access to quay/ghcr/gcr. See README.md for instructions.
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: tekton-pipelines-controller
-    namespace: tekton-pipelines
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        app: tekton-pipelines-controller
-    template:
-      metadata:
-        labels:
-          app: tekton-pipelines-controller
-      spec:
-        serviceAccountName: tekton-pipelines-controller
-        # Uncomment and set the name of an imagePullSecret if needed:
-        # imagePullSecrets:
-        #   - name: quay-reg
-        containers:
-          - name: tekton-pipelines-controller
-            image: quay.io/tektoncd/pipeline/cmd/controller:v1.5.0
-            imagePullPolicy: IfNotPresent
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "128Mi"
-              limits:
-                cpu: "500m"
-                memory: "512Mi"
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+  name: config-defaults
+  namespace: tekton-pipelines
+data:
+  default-timeout-minutes: "60"
+  default-service-account: "default"
+  default-managed-by-label-value: "tekton-pipelines"
+  default-cloud-events-sink: ""
+  default-task-run-workspace-binding: ""
+  default-max-matrix-combinations-count: "256"
+  default-forbidden-env: ""
+  default-affinity-assistant-pod-template: ""
+  default-node-selector: ""
+  default-tolerations: ""
+  default-runtime-class: ""
+  default-pod-template: ""
+  default-apicoverage-check: "true"
+  default-keep-pod-on-cancel: "false"
+  default-enable-api-fields: "stable"
+  default-send-cloudevents-for-runs: "false"
+  default-verification-no-match-policy: "ignore"
+  default-enable-provenance-in-status: "true"
+  default-result-extraction-method: "termination-message"
+  default-max-result-size: "4096"
+  default-enforce-nonfalsified-provenance: "false"
+  default-set-security-context: "false"
+  default-security-context: ""
+  default-disable-affinity-assistant: "false"
+  default-disable-creds-init: "false"
+  default-running-in-environment-with-injected-sidecars: "true"
+  default-require-git-ssh-secret-known-hosts: "false"
+  default-enable-git-resolver: "false"
+  default-enable-hub-resolver: "false"
+  default-trusted-resources-verification-no-match-policy: "ignore"
+  default-trusted-resources-verified-annotations: "true"
+  default-enable-cel-in-whenexpression: "false"
+  default-enable-step-actions: "false"
