@@ -4,5 +4,5 @@ resources:
 patches:
 - path: patches/patch-remove-github-interceptor.yaml
   target:
-    kind: Deployment
-    name: el-suma-ecommerce-release-listener
+    kind: EventListener
+    name: suma-ecommerce-release-listener

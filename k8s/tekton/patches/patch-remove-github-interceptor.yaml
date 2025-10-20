@@ -1,13 +1,19 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
 metadata:
-  name: el-suma-ecommerce-release-listener
+  name: suma-ecommerce-release-listener
   namespace: default
 spec:
-  template:
-    spec:
-      containers:
-      - name: event-listener
-        args:
-        - "--el-name=suma-ecommerce-release-listener"
-        - "--payload-validation=false"
+  triggers:
+  - name: suma-ecommerce-release-trigger
+    # remove the 'github' interceptor by explicitly setting interceptors to only 'cel'
+    interceptors:
+    - ref:
+        name: cel
+      params:
+      - name: filter
+        value: "body.action == 'published' && body.release.target_commitish == 'production' && body.repository.name == 'suma_ecommerce_api'"
+    bindings:
+    - ref: suma-ecommerce-release-binding
+    template:
+      ref: suma-ecommerce-release-template
