@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - eventlistener.yaml
+  - git-clone-task.yaml
+  - kaniko-task.yaml
+  - pipeline.yaml
+  - triggerbinding.yaml
+  - triggertemplate.yaml
+  - update-deployment-task.yaml

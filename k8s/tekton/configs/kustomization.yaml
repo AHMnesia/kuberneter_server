@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - config-defaults-v0.63.yaml
+  - config-events.yaml
+  - config-feature-flags.yaml
+  - config-logging.yaml
+  - config-observability.yaml
+  - config-spire.yaml
+  - config-tracing.yaml
+  - config-wait-exponential-backoff.yaml
