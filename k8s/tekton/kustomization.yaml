@@ -1,8 +1,0 @@
-resources:
-- suma-ecommerce/eventlistener.yaml
-
-patches:
-- path: patches/patch-remove-github-interceptor.yaml
-  target:
-    kind: EventListener
-    name: suma-ecommerce-release-listener
