@@ -41,7 +41,7 @@ spec:
       #   - name: quay-reg
       containers:
         - name: tekton-pipelines-controller
-          image: quay.io/tektoncd/pipeline/cmd/controller:v1.5.0
+          image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.63.0
           imagePullPolicy: IfNotPresent
           resources:
             requests:
