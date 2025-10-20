@@ -1,63 +1,88 @@
 apiVersion: v1
 kind: Namespace
+apiVersion: v1
+kind: Namespace
 metadata:
   name: tekton-pipelines
 
 ---
-# Tekton non-CRD resources (trimmed)
-# This file should contain the full set of namespaced/non-CRD resources
-# required by Tekton (ServiceAccounts, Roles, RoleBindings, Deployments,
-# Services, ConfigMaps, PVCs, etc.). The full non-CRD content was truncated for
-# brevity; if you have the original non-CRD blocks, paste them here.
-
-# Example placeholders (replace with actual content from original file):
+# Service accounts used by Tekton components
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: tekton-pipelines-controller
-  namespace: tekton-pipelines
+  apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: tekton-pipelines
 
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tekton-pipelines-webhook
-  namespace: tekton-pipelines
+  ---
+  ---
+  # ServiceAccounts used by Tekton components
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: tekton-pipelines-controller
+    namespace: tekton-pipelines
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tekton-pipelines-controller
-  namespace: tekton-pipelines
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: tekton-pipelines-controller
-  template:
-    metadata:
-      labels:
+  ---
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: tekton-pipelines-webhook
+    namespace: tekton-pipelines
+
+  ---
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: tekton-triggers-controller
+    namespace: tekton-pipelines
+
+  ---
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: tekton-triggers-webhook
+    namespace: tekton-pipelines
+
+  ---
+  # Minimal Deployment for Tekton Pipelines controller (standardized image)
+  # Note: Keep imagePullSecrets configured in the cluster if your nodes need
+  # authenticated access to quay/ghcr/gcr. See README.md for instructions.
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: tekton-pipelines-controller
+    namespace: tekton-pipelines
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
         app: tekton-pipelines-controller
-    spec:
-      serviceAccountName: tekton-pipelines-controller
-      containers:
-        - name: tekton-pipelines-controller
-          image: quay.io/tektoncd/pipeline/cmd/controller:v1.5.0
-          resources:
+    template:
+      metadata:
+        labels:
+          app: tekton-pipelines-controller
+      spec:
+        serviceAccountName: tekton-pipelines-controller
+        # Uncomment and set the name of an imagePullSecret if needed:
+        # imagePullSecrets:
+        #   - name: quay-reg
+        containers:
+          - name: tekton-pipelines-controller
+            image: quay.io/tektoncd/pipeline/cmd/controller:v1.5.0
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "128Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
             requests:
               cpu: "100m"
               memory: "128Mi"
             limits:
               cpu: "500m"
               memory: "512Mi"
-
----
-# (Other non-CRD resources from the original tekton-pipelines-noncrd.yaml follow)
-# The file below contains the namespaced and cluster roles/bindings, serviceaccounts,
-# RBAC, Deployments, Services, ConfigMaps, Secrets and other non-CRD resources
-# necessary for Tekton runtime but with the CustomResourceDefinition documents removed.
-
-# NOTE: This file intentionally excludes any `apiVersion: apiextensions.k8s.io/v1` /
-# `kind: CustomResourceDefinition` documents. CRDs are backed up in
-# tekton/tekton-crds-backup.yaml and should be managed once at infra level.
