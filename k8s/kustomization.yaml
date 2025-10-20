@@ -12,7 +12,27 @@ resources:
   - certs/clusterissuer-selfsigned.yaml
   - certs/api-public-cert.yaml
 
-  # 3. Infra pendukung (monitoring)
+  # 3. Infra pendukung (redis, elasticsearch, kibana, monitoring)
+  # - redis/namespace.yaml
+  # - redis/redis-cluster.yaml
+  # - elasticsearch/namespace.yaml
+  # - elasticsearch/ca-cert.yaml
+  # - elasticsearch/issuer-ca.yaml
+  # - elasticsearch/issuer-selfsigned.yaml
+  # - elasticsearch/certificate.yaml
+  # - elasticsearch/statefulset.yaml
+  # - elasticsearch/service.yaml
+  # - elasticsearch/networkpolicy.yaml
+  # - elasticsearch/node-cert.yaml
+  # - elasticsearch/poddisruptionbudget.yaml
+  # - elasticsearch/ingress.yaml
+  # - kibana/namespace.yaml
+  # - kibana/encryption-secret.yaml
+  # - kibana/deployment.yaml
+  # - kibana/service.yaml
+  # - kibana/networkpolicy.yaml
+  # - kibana/poddisruptionbudget.yaml
+  # - kibana/ingress.yaml
   - monitoring/namespace.yaml
   - monitoring/configmap.yaml
   - monitoring/rbac.yaml
@@ -23,9 +43,18 @@ resources:
   - monitoring/networkpolicy.yaml
   - monitoring/ingress.yaml
 
-  # 4. Service aplikasi (suma-chat)
+  # 4. Service aplikasi (namespace dulu, lalu lainnya)
+  # - suma-android/namespace.yaml
+  # - suma-android/certificate.yaml
+  # - suma-android/pvc.yaml
+  # - suma-android/service.yaml
+  # - suma-android/deployment.yaml
+  # - suma-android/hpa.yaml
+  # - suma-android/networkpolicy.yaml
+  # - suma-android/poddisruptionbudget.yaml
+  # - suma-android/ingress.yaml
+
   - suma-chat/namespace.yaml
-  - suma-chat/secret.yaml
   - suma-chat/certificate.yaml
   - suma-chat/configmap.yaml
   - suma-chat/redis-deployment.yaml
@@ -42,14 +71,59 @@ resources:
   - ngrok/deployments.yaml
   - ngrok/service.yaml
 
+  # - suma-ecommerce/namespace.yaml
+  # - suma-ecommerce/certificate.yaml
+  # - suma-ecommerce/pvc.yaml
+  # - suma-ecommerce/service.yaml
+  # - suma-ecommerce/deployment.yaml
+  # - suma-ecommerce/hpa.yaml
+  # - suma-ecommerce/networkpolicy.yaml
+  # - suma-ecommerce/poddisruptionbudget.yaml
+  # - suma-ecommerce/ingress.yaml
+
+  # - suma-office/namespace.yaml
+  # - suma-office/certificate.yaml
+  # - suma-office/configmap.yaml
+  # - suma-office/pvc.yaml
+  # - suma-office/service.yaml
+  # - suma-office/deployment.yaml
+  # - suma-office/hpa.yaml
+  # - suma-office/networkpolicy.yaml
+  # - suma-office/poddisruptionbudget.yaml
+  # - suma-office/ingress.yaml
+
+  # - suma-office-general/namespace.yaml
+  # - suma-office-general/certificate.yaml
+  # - suma-office-general/configmap.yaml
+  # - suma-office-general/pvc.yaml
+  # - suma-office-general/service.yaml
+  # - suma-office-general/deployment.yaml
+  # - suma-office-general/hpa.yaml
+  # - suma-office-general/networkpolicy.yaml
+  # - suma-office-general/poddisruptionbudget.yaml
+  # - suma-office-general/ingress.yaml
+
+  # - suma-pmo/namespace.yaml
+  # - suma-pmo/certificate.yaml
+  # - suma-pmo/pvc.yaml
+  # - suma-pmo/service.yaml
+  # - suma-pmo/deployment.yaml
+  # - suma-pmo/hpa.yaml
+  # - suma-pmo/networkpolicy.yaml
+  # - suma-pmo/poddisruptionbudget.yaml
+  # - suma-pmo/ingress.yaml
+
   # 5. Dashboard ArgoCD
   - argocd/dashboard-ingress.yaml
 
-  # 6. Tekton Deploy (non-CRD resources)
-  # Use CRD-less variants so ArgoCD does not continuously manage CRDs from this app.
-  - tekton/triggers/core/tekton-triggers-core-interceptors-certs.yaml
+  # 6. Tekton Deploy (ClusterRole, Namespace, dll. dulu)
+  - tekton/core/pvc.yaml
+  - tekton/core/rbac.yaml
+  - tekton/triggers/core/triggers-clusterrole.yaml
+  - tekton/ingress/dashboard.yaml
+  - tekton/ingress/eventlistener.yaml
 
-  # 7. Tekton Pipelines dan Triggers (suma-ecommerce)
+  # 8. Tekton Pipelines dan Triggers (suma-ecommerce)
   - tekton/triggers/projects/suma-ecommerce/git-clone-task.yaml
   - tekton/triggers/projects/suma-ecommerce/kaniko-task.yaml
   - tekton/triggers/projects/suma-ecommerce/pipeline.yaml
