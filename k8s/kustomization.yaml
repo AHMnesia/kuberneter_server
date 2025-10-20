@@ -75,5 +75,8 @@ resources:
   - tekton/suma-ecommerce/triggertemplate.yaml
   - tekton/suma-ecommerce/update-deployment-task.yaml
   - tekton/suma-ecommerce/eventlistener.yaml
-patchesStrategicMerge:
-  - tekton/patches/patch-el-eventlistener-payload-validation.yaml
+patches:
+  - path: tekton/patches/patch-el-eventlistener-payload-validation.yaml
+    target:
+      kind: EventListener
+      name: suma-ecommerce-release-listener
