@@ -42,6 +42,13 @@ spec:
       containers:
         - name: tekton-pipelines-controller
           image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.63.0
+          args:
+            - "--entrypoint-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.63.0"
+            - "--nop-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/nop:v0.63.0"
+            - "--shell-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/shell:v0.63.0"
+            - "--shell-image-win=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/shell:v0.63.0"
+            - "--sidecarlogresults-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/sidecarlogresults:v0.63.0"
+            - "--workingdirinit-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/workingdirinit:v0.63.0"
           imagePullPolicy: IfNotPresent
           resources:
             requests:
