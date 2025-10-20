@@ -50,6 +50,11 @@ spec:
             - "--sidecarlogresults-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/sidecarlogresults:v0.63.0"
             - "--workingdirinit-image=gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/workingdirinit:v0.63.0"
           imagePullPolicy: IfNotPresent
+          env:
+            - name: SYSTEM_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           resources:
             requests:
               cpu: "100m"
