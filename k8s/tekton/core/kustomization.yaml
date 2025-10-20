@@ -6,7 +6,6 @@ resources:
   - 00-minimal-noncrd.yaml
   - clusterrole-configmaps.yaml
   - dashboard.yaml
-  - pipelines.yaml
   - pvc.yaml
   - rbac.yaml
   - registry.yaml
