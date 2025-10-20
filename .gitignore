@@ -1,3 +1,5 @@
+# ignore local artifacts
+ca.b64
 /suma-android
 /suma-chat
 /suma-ecommerce
