@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-defaults
+  namespace: tekton-pipelines
+data:
+  # images aligned to Tekton Pipelines v0.63
+  entrypoint-image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.63.0
+  nop-image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/nop:v0.63.0
+  shell-image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/shell:v0.63.0
+  shell-image-win: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/shell:v0.63.0
+  sidecarlogresults-image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/sidecarlogresults:v0.63.0
+  workingdirinit-image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/workingdirinit:v0.63.0
