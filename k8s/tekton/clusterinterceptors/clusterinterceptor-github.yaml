@@ -1,0 +1,30 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: ClusterInterceptor
+metadata:
+  name: github
+  labels:
+    app.kubernetes.io/managed-by: manual-fix
+spec:
+  # This ClusterInterceptor mirrors a webhook-style interceptor with a CA bundle
+  # so EventListener can validate TLS for cluster interceptors. This is a minimal
+  # temporary object to unblock EL; consider installing official core-interceptors.
+  clientConfig:
+    url: "https://github.com/" # placeholder URL; controller primarily needs caBundle populated
+    caBundle: |
+      -----BEGIN CERTIFICATE-----
+      MIICxzCCAa+gAwIBAgIRANK0cDquA8IqmWrykCdGtoMwDQYJKoZIhvcNAQELBQAw
+      ADAeFw0yNTEwMTgwNTM5MjhaFw0yNjAxMTYwNTM5MjhaMAAwggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDrk0RhMdnllmC1IQ1bQOQuj+W+Z6j8nHYjnydG
+      k5FXZhqOTVR7c+cNQNAfZGOS9FZ8LKaQ0r9TM+gaUmWeM5bnLpyoIvbkjGhJvhid
+      ZcWtIT5kcqmr8olLna0zCJ3VeP389S8qwdQ+dpLlc3iiL+Jn9HBaM6Rud3eA2Fo5
+      ot3gRIVtTqlqkizpMAfvY4MnByurQyEDgjCqfi6uM2MjLeqmEuYuvQQe153EVrzi
+      6yHAvlE/XX/zJ/mDHiIHZhZg5vDXm4Kdiiq0SEpLFeJdpZAQ1zYBDLGNrBuMfy1k
+      xs2ej8g3ZthfbYFt1uA3yNMTJKA0lu/D45+yKswCSlEwSaP9AgMBAAGjPDA6MA4G
+      A1UdDwEB/wQEAwIFoDAMBgNVHRMBAf8EAjAAMBoGA1UdEQEB/wQQMA6CDHRla3Rv
+      bi5sb2NhbDANBgkqhkiG9w0BAQsFAAOCAQEAFNfWc28dBIHA9bkK+J52hx2ZGZbx
+      VOJH4ScE3RUVQeqWnOR9M3hvaz342UkgaD3TwaG0nfTfyFB7rgWAL7WX3WCihL3W
+      ck/OYiGAhrcchWrbOieCR23nnWuYq6cNDJyo2k4AUkVUT456n1ga6HHdY11k3Bml
+      uv5G9juVvKbegBI9hMBltcKUtJMLrXe3Nw259crxWjvyz3SjJhegkuh08Ng36+zN
+      vlyBDhoBezYSs9zrQAUzSGFus1B/+7vEzkqpVFVib+i0DOOHUz/r8g/7uhOQWGmt
+      DsawlIMQEwXFCePRxPLL6YBti55All67+pAiQwhtQnYkLDvljWGI3cXxPg==
+      -----END CERTIFICATE-----
